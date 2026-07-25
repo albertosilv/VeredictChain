@@ -1,0 +1,20 @@
+Rede: hardhat (Hardhat Network - EVM local de testes)
+Deployer: 0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266
+VeredictChain deployado em: 0x5FbDB2315678afecb367f032d93F642f64180aa3
+Magistrado credenciado (hash): 0x1f3d89c259932131898eba5c76186e6b44d0e4a152456d70ce3063ad56c2094b
+Decisao registrada. Tx hash: 0xbd18bf8b8ff2f27b13f5d90a50f2d89617b22326cda581510595920b3a44dc29
+Hash do documento registrado: 0xee092bc38400dac414fe7e4c673e7fe4079806ec66a6c65e23d824a8f770aeb2
+
+Verificacao publica do hash:
+  existe: true
+  numeroProcesso: 0001234-56.2026.8.15.0001
+  tribunalOrigem: TJPB
+  status (1=Publicada): 1
+
+Tentativa de verificar acordao FALSO atribuido ao STJ:
+  existe na blockchain: false -> documento seria BLOQUEADO pelo sistema receptor
+
+=== RESUMO DO DEPLOY ===
+Endereco do contrato: 0x5FbDB2315678afecb367f032d93F642f64180aa3
+Rede: hardhat
+Chain ID: 31337
