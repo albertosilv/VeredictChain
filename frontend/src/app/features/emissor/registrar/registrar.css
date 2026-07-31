@@ -1,0 +1,218 @@
+.registrar {
+  max-width: 680px;
+  margin: 0 auto;
+}
+
+h2 {
+  margin: 0 0 1.5rem;
+  font-size: 1.4rem;
+  color: #1e293b;
+}
+
+/* ── Sections ─────────────────────────────── */
+
+.section {
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+
+  h3 {
+    margin: 0 0 1rem;
+    font-size: 1rem;
+    color: #475569;
+  }
+}
+
+/* ── Dropzone ─────────────────────────────── */
+
+.dropzone {
+  position: relative;
+
+  input[type='file'] {
+    position: absolute;
+    opacity: 0;
+    width: 0;
+    height: 0;
+  }
+
+  label {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 2rem 1rem;
+    border: 2px dashed #cbd5e1;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: border-color 0.2s;
+    text-align: center;
+
+    &:hover {
+      border-color: #2563eb;
+    }
+  }
+
+  &.has-file label {
+    border-color: #16a34a;
+    border-style: solid;
+    background: #f0fdf4;
+  }
+
+  .drop-icon {
+    font-size: 2rem;
+  }
+
+  small {
+    color: #94a3b8;
+    font-size: 0.8rem;
+  }
+}
+
+/* ── Hash display ─────────────────────────── */
+
+.status {
+  margin: 0.75rem 0 0;
+  font-size: 0.85rem;
+  color: #64748b;
+}
+
+.hash-box {
+  margin-top: 0.75rem;
+  background: #f1f5f9;
+  border-radius: 4px;
+  padding: 0.6rem 0.75rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+
+  .label {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: #64748b;
+    white-space: nowrap;
+  }
+
+  code {
+    font-size: 0.78rem;
+    color: #1e293b;
+    word-break: break-all;
+  }
+}
+
+/* ── Grid de campos ───────────────────────── */
+
+.grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+
+  label {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: #334155;
+  }
+
+  .full-width {
+    grid-column: 1 / -1;
+  }
+
+  input,
+  select {
+    padding: 0.5rem 0.75rem;
+    border: 1px solid #d4d4d8;
+    border-radius: 4px;
+    font-size: 0.9rem;
+    background: white;
+
+    &:focus {
+      outline: none;
+      border-color: #2563eb;
+      box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.15);
+    }
+  }
+
+  select {
+    cursor: pointer;
+  }
+}
+
+/* ── Feedback ─────────────────────────────── */
+
+.feedback {
+  padding: 1rem;
+  border-radius: 6px;
+  margin-bottom: 1rem;
+  font-size: 0.9rem;
+
+  p {
+    margin: 0.25rem 0 0;
+  }
+
+  code {
+    font-size: 0.8rem;
+    word-break: break-all;
+  }
+}
+
+.erro {
+  background: #fef2f2;
+  color: #991b1b;
+  border: 1px solid #fecaca;
+}
+
+.sucesso {
+  background: #f0fdf4;
+  color: #166534;
+  border: 1px solid #bbf7d0;
+}
+
+/* ── Actions ──────────────────────────────── */
+
+.actions {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.btn-primary {
+  padding: 0.6rem 1.5rem;
+  background: #2563eb;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 0.95rem;
+  font-weight: 500;
+  cursor: pointer;
+
+  &:hover:not(:disabled) {
+    background: #1d4ed8;
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+}
+
+.btn-secondary {
+  padding: 0.6rem 1.5rem;
+  background: white;
+  color: #475569;
+  border: 1px solid #d4d4d8;
+  border-radius: 6px;
+  font-size: 0.95rem;
+  cursor: pointer;
+
+  &:hover:not(:disabled) {
+    background: #f1f5f9;
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}
