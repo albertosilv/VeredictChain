@@ -1,1 +1,32 @@
+# Dependências
+node_modules/
 node_modules
+
+# Build de contratos (artifacts do Hardhat, dentro de contracts/)
+contracts/build/
+contracts/artifacts/
+contracts/cache/
+contracts/typechain-types/
+
+# Logs de execução local
+*.log
+
+# Variáveis de ambiente (chaves privadas, secrets)
+.env
+.env.local
+.env.*.local
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Backend (quando criado)
+backend/dist/
+backend/node_modules/
+
+# Frontend (já coberto pelo angular.json, mas redundância não faz mal)
+frontend/dist/
