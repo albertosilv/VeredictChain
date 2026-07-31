@@ -1,1 +1,2 @@
-export { Decisao, DecisaoInput, StatusDecisao } from './decisao.model';
+export type { Decisao, DecisaoInput } from './decisao.model';
+export { StatusDecisao } from './decisao.model';
