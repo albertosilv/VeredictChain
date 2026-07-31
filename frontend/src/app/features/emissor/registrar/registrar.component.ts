@@ -2,6 +2,7 @@ import { Component, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { HashService } from '../../../core/services/hash.service';
 import { DecisaoService } from '../../../core/services/decisao.service';
+import { AuthService } from '../../../core/services/auth.service';
 import type { DecisaoInput } from '../../../core/models/decisao.model';
 
 interface FormState {
@@ -10,7 +11,6 @@ interface FormState {
   numeroProcesso: string;
   tribunalOrigem: string;
   orgaoJulgador: string;
-  magistradoHash: string;
   canalTransmissao: string;
 }
 
@@ -20,7 +20,6 @@ const FORM_VAZIO: FormState = {
   numeroProcesso: '',
   tribunalOrigem: '',
   orgaoJulgador: '',
-  magistradoHash: '',
   canalTransmissao: 'DJe',
 };
 
@@ -36,6 +35,7 @@ const CANAIS = ['DJe', 'SEEU', 'Malote Digital', 'PJe', 'e-SAJ', 'Outro'];
 export class RegistrarComponent {
   private readonly hashService = inject(HashService);
   private readonly decisaoService = inject(DecisaoService);
+  private readonly auth = inject(AuthService);
 
   readonly form = signal<FormState>({ ...FORM_VAZIO });
 
@@ -43,6 +43,10 @@ export class RegistrarComponent {
   readonly enviando = signal(false);
   readonly resultado = signal<{ txHash: string; documentHash: string } | null>(null);
   readonly erro = signal<string | null>(null);
+
+  // ── Hash do magistrado logado ──────────────────────────────────
+
+  readonly magistradoHash = this.auth.magistradoHash;
 
   // ── Upload & Hash ──────────────────────────────────────────────
 
@@ -69,12 +73,18 @@ export class RegistrarComponent {
 
   onSubmit(): void {
     const f = this.form();
+    const magistradoHash = this.auth.magistradoHash();
+
     if (!f.arquivo || !f.documentHash) {
       this.erro.set('Selecione um arquivo para gerar o hash.');
       return;
     }
-    if (!f.numeroProcesso || !f.tribunalOrigem || !f.orgaoJulgador || !f.magistradoHash) {
+    if (!f.numeroProcesso || !f.tribunalOrigem || !f.orgaoJulgador) {
       this.erro.set('Preencha todos os campos obrigatórios.');
+      return;
+    }
+    if (!magistradoHash) {
+      this.erro.set('Magistrado não identificado. Faça login novamente.');
       return;
     }
 
@@ -87,7 +97,7 @@ export class RegistrarComponent {
       numeroProcesso: f.numeroProcesso,
       tribunalOrigem: f.tribunalOrigem,
       orgaoJulgador: f.orgaoJulgador,
-      magistradoHash: f.magistradoHash,
+      magistradoHash,
       canalTransmissao: f.canalTransmissao,
     };
 

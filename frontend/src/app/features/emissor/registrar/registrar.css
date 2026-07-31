@@ -139,6 +139,33 @@ h2 {
   select {
     cursor: pointer;
   }
+
+  .hash-info {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 4px;
+    padding: 0.6rem 0.75rem;
+
+    .label {
+      font-size: 0.85rem;
+      font-weight: 500;
+      color: #334155;
+    }
+
+    code {
+      font-size: 0.78rem;
+      color: #64748b;
+      word-break: break-all;
+    }
+
+    small {
+      color: #94a3b8;
+      font-size: 0.75rem;
+    }
+  }
 }
 
 /* ── Feedback ─────────────────────────────── */

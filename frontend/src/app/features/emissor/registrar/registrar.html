@@ -87,16 +87,11 @@
         </select>
       </label>
 
-      <label class="full-width">
-        Magistrado (hash ICP-Brasil) *
-        <input
-          type="text"
-          [ngModel]="form().magistradoHash"
-          (ngModelChange)="form.update(f => ({ ...f, magistradoHash: $event }))"
-          placeholder="0x..."
-          name="magistradoHash"
-        />
-      </label>
+      <div class="full-width hash-info">
+        <span class="label">Magistrado (hash ICP-Brasil)</span>
+        <code>{{ magistradoHash() }}</code>
+        <small>Hash associado ao login — preenchido automaticamente.</small>
+      </div>
     </div>
   </section>
 
