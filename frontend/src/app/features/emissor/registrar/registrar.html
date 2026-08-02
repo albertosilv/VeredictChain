@@ -1,0 +1,120 @@
+<div class="registrar">
+  <h2>Registrar Decisão</h2>
+
+  <!-- ═══ ARQUIVO ═══ -->
+  <section class="section">
+    <h3>Documento</h3>
+    <div class="dropzone" [class.has-file]="!!form().arquivo">
+      <input
+        type="file"
+        id="arquivo"
+        (change)="onFileSelected($event)"
+        accept=".pdf,.doc,.docx,.odt,.txt"
+      />
+      <label for="arquivo">
+        @if (!form().arquivo) {
+          <span class="drop-icon">📄</span>
+          <span>Clique para selecionar o documento</span>
+          <small>PDF, DOCX, ODT, TXT</small>
+        } @else {
+          <span class="drop-icon">✅</span>
+          <span>{{ form().arquivo!.name }}</span>
+          <small>{{ (form().arquivo!.size / 1024).toFixed(1) }} KB</small>
+        }
+      </label>
+    </div>
+
+    @if (calculando()) {
+      <p class="status">⏳ Calculando hash SHA-256...</p>
+    }
+
+    @if (form().documentHash) {
+      <div class="hash-box">
+        <span class="label">SHA-256:</span>
+        <code>{{ form().documentHash }}</code>
+      </div>
+    }
+  </section>
+
+  <!-- ═══ METADADOS ═══ -->
+  <section class="section">
+    <h3>Metadados do Processo</h3>
+
+    <div class="grid">
+      <label>
+        Nº Processo *
+        <input
+          type="text"
+          [ngModel]="form().numeroProcesso"
+          (ngModelChange)="form.update(f => ({ ...f, numeroProcesso: $event }))"
+          placeholder="0001234-56.2026.8.15.0001"
+          name="numeroProcesso"
+        />
+      </label>
+
+      <label>
+        Tribunal de Origem *
+        <input
+          type="text"
+          [ngModel]="form().tribunalOrigem"
+          (ngModelChange)="form.update(f => ({ ...f, tribunalOrigem: $event }))"
+          placeholder="TJPB"
+          name="tribunalOrigem"
+        />
+      </label>
+
+      <label>
+        Órgão Julgador *
+        <input
+          type="text"
+          [ngModel]="form().orgaoJulgador"
+          (ngModelChange)="form.update(f => ({ ...f, orgaoJulgador: $event }))"
+          placeholder="1ª Vara Cível"
+          name="orgaoJulgador"
+        />
+      </label>
+
+      <label>
+        Canal de Transmissão
+        <select
+          [ngModel]="form().canalTransmissao"
+          (ngModelChange)="form.update(f => ({ ...f, canalTransmissao: $event }))"
+          name="canalTransmissao"
+        >
+          @for (c of canais; track c) {
+            <option [value]="c">{{ c }}</option>
+          }
+        </select>
+      </label>
+
+      <div class="full-width hash-info">
+        <span class="label">Magistrado (hash ICP-Brasil)</span>
+        <code>{{ magistradoHash() }}</code>
+        <small>Hash associado ao login — preenchido automaticamente.</small>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ FEEDBACK ═══ -->
+  @if (erro()) {
+    <div class="feedback erro">{{ erro() }}</div>
+  }
+
+  @if (resultado()) {
+    <div class="feedback sucesso">
+      <strong>Decisão registrada!</strong>
+      <p>Tx: <code>{{ resultado()!.txHash }}</code></p>
+      <p>Hash: <code>{{ resultado()!.documentHash }}</code></p>
+    </div>
+  }
+
+  <!-- ═══ AÇÕES ═══ -->
+  <div class="actions">
+    <button class="btn-primary" (click)="onSubmit()" [disabled]="enviando() || calculando()">
+      {{ enviando() ? 'Registrando...' : 'Registrar Decisão' }}
+    </button>
+    <button class="btn-secondary" (click)="reset()" [disabled]="enviando()">
+      Limpar
+    </button>
+  </div>
+</div>

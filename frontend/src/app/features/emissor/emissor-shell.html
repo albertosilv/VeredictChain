@@ -1,0 +1,13 @@
+<div class="emissor-layout">
+  <nav class="sidebar">
+    <h3>Painel Emissor</h3>
+    <ul>
+      <li><a routerLink="/emissor/registrar" routerLinkActive="active">Registrar Decisão</a></li>
+      <li><a routerLink="/emissor/consultar" routerLinkActive="active">Consultar Processo</a></li>
+    </ul>
+    <button class="logout" (click)="auth.logout()">Sair</button>
+  </nav>
+  <main class="content">
+    <router-outlet />
+  </main>
+</div>

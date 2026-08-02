@@ -1,0 +1,22 @@
+<div class="login-container">
+  <form (ngSubmit)="onSubmit()" class="login-card">
+    <h2>Painel Emissor</h2>
+    <p class="subtitulo">Mock PJe/SEI — Acesso restrito</p>
+
+    <label>
+      Usuário
+      <input type="text" [ngModel]="usuario()" (ngModelChange)="usuario.set($event); erro.set(false)" name="usuario" />
+    </label>
+
+    <label>
+      Senha
+      <input type="password" [ngModel]="senha()" (ngModelChange)="senha.set($event); erro.set(false)" name="senha" />
+    </label>
+
+    @if (erro()) {
+      <p class="erro">Credenciais inválidas.</p>
+    }
+
+    <button type="submit">Entrar</button>
+  </form>
+</div>
