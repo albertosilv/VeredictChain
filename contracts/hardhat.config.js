@@ -18,6 +18,11 @@ module.exports = {
     hardhat: {
       // rede de testes local, efêmera, usada para compilar/testar/demonstrar o deploy
     },
+    besu: {
+      url: process.env.BESU_RPC_URL || 'http://127.0.0.1:8545',
+      accounts: process.env.BESU_PRIVATE_KEY ? [process.env.BESU_PRIVATE_KEY] : [],
+      chainId: 1337,
+    },
     sepolia: {
       url: SEPOLIA_RPC_URL,
       accounts: PRIVATE_KEY ? [PRIVATE_KEY] : [],
