@@ -11,11 +11,12 @@ interface Credenciais {
  * Em produção, isso viria do ICP-Brasil (hash do certificado digital).
  * Para o mock, usamos um hash de exemplo fixo, consistente com o deploy.
  */
+/** Hash gerado pelo deploy: keccak256("cert-icp-brasil-des-frederico-coutinho") */
 const MOCK_CREDENCIAIS: Credenciais = {
   usuario: 'magistrado',
   senha: 'tjpB2026',
   magistradoHash:
-    '0x1111111111111111111111111111111111111111111111111111111111111111',
+    '0x1f3d89c259932131898eba5c76186e6b44d0e4a152456d70ce3063ad56c2094b',
 };
 
 @Injectable({ providedIn: 'root' })

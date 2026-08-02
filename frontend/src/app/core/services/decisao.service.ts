@@ -1,5 +1,6 @@
-import { Injectable } from '@angular/core';
-import { Observable, of, delay } from 'rxjs';
+import { Injectable, inject } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { Observable } from 'rxjs';
 import type { DecisaoInput } from '../models/decisao.model';
 
 export interface RegistrarResultado {
@@ -8,45 +9,22 @@ export interface RegistrarResultado {
 }
 
 /**
- * Serviço de comunicação com o backend integrador.
+ * Serviço de comunicação com o backend integrador (NestJS).
  *
- * Quando o backend NestJS existir, este serviço apontará para:
- * `POST /api/decisoes` (registro) e `POST /api/decisoes/retificar`.
- *
- * Por enquanto, é um stub que simula latência de rede e retorna
- * dados mockados para o frontend evoluir sem depender do backend.
+ * Endpoints:
+ * - POST /api/decisoes           → registra nova decisão
+ * - POST /api/decisoes/retificar → retifica decisão existente
  */
 @Injectable({ providedIn: 'root' })
 export class DecisaoService {
-  /**
-   * Registra uma nova decisão judicial.
-   * Futuro: `this.http.post<RegistrarResultado>('/api/decisoes', { ...input, arquivo })`
-   */
-  registrar(input: DecisaoInput): Observable<RegistrarResultado> {
-    const mock: RegistrarResultado = {
-      txHash: '0x' + Array.from({ length: 64 }, () =>
-        Math.floor(Math.random() * 16).toString(16),
-      ).join(''),
-      documentHash: input.documentHash,
-    };
+  private readonly http = inject(HttpClient);
+  private readonly baseUrl = 'http://localhost:3000/api/decisoes';
 
-    console.log('[DecisaoService] STUB — registrarDecisao:', input);
-    return of(mock).pipe(delay(800)); // simula latência
+  registrar(input: DecisaoInput): Observable<RegistrarResultado> {
+    return this.http.post<RegistrarResultado>(this.baseUrl, input);
   }
 
-  /**
-   * Retifica uma decisão existente.
-   * Futuro: `this.http.post<RegistrarResultado>('/api/decisoes/retificar', { ...input })`
-   */
   retificar(input: DecisaoInput): Observable<RegistrarResultado> {
-    const mock: RegistrarResultado = {
-      txHash: '0x' + Array.from({ length: 64 }, () =>
-        Math.floor(Math.random() * 16).toString(16),
-      ).join(''),
-      documentHash: input.documentHash,
-    };
-
-    console.log('[DecisaoService] STUB — registrarRetificacao:', input);
-    return of(mock).pipe(delay(800));
+    return this.http.post<RegistrarResultado>(`${this.baseUrl}/retificar`, input);
   }
 }

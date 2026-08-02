@@ -19,8 +19,8 @@ Assistente de desenvolvimento para o **VeredictChain** (TJPB/UFCG). Foco em:
 - **Frontend**: Angular 22+ (Signals, standalone), Web Crypto API
 
 ## 📁 Estrutura (monorepo — 3 pastas na raiz)
-- `contracts/` — Hardhat + Solidity, `VeredictChain.sol`, scripts, testes, docs, agent_docs
-- `backend/` — (a criar) Integrador NestJS autorizado (gerencia carteira, assina transações)
+- `contracts/` — Hardhat + Solidity (`contracts/VeredictChain.sol`), scripts, testes, docs, agent_docs
+- `backend/` — NestJS, Integrador autorizado (gerencia carteira, assina transações via ethers v6)
 - `frontend/` — Angular, Dropzone público + Painel Emissor (mock PJe/SEI)
 
 ## 🔑 Comandos
