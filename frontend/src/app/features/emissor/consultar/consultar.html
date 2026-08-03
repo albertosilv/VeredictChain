@@ -1,0 +1,95 @@
+<div class="consultar-container">
+  <h2>Consultar Processo</h2>
+
+  <!-- Busca -->
+  <form class="busca-form" (submit)="onBuscar(); $event.preventDefault()">
+    <input
+      type="text"
+      [ngModel]="numeroProcesso()"
+      (ngModelChange)="numeroProcesso.set($event)"
+      placeholder="Número do processo (ex: 0001234-56.2026.8.15.0001)"
+      class="busca-input"
+    />
+    <button type="submit" class="btn-buscar" [disabled]="buscando() || !numeroProcesso()">
+      {{ buscando() ? 'Buscando...' : 'Buscar' }}
+    </button>
+  </form>
+
+  <!-- Loading -->
+  @if (buscando()) {
+    <p class="loading">Consultando blockchain...</p>
+  }
+
+  <!-- Erro -->
+  @if (erro()) {
+    <div class="erro">{{ erro() }}</div>
+  }
+
+  <!-- Resultado -->
+  @if (decisoes().length > 0) {
+    <div class="resultado">
+      <h3>
+        Processo: {{ decisoes()[0].numeroProcesso }}
+        <span class="badge-versao">{{ decisoes().length }} versão{{ decisoes().length > 1 ? 'ões' : '' }}</span>
+      </h3>
+
+      <div class="timeline">
+        @for (decisao of decisoes(); track decisao.documentHash; let i = $index) {
+          <div class="timeline-item" [class.ultima]="i === decisoes().length - 1">
+            <div class="timeline-marker">
+              <span class="status-badge" [class]="statusClass(decisao.status)">
+                {{ statusLabel(decisao.status) }}
+              </span>
+            </div>
+            <div class="timeline-card">
+              <div class="card-header">
+                <span class="versao-label">v{{ i + 1 }}</span>
+                <span class="data">{{ decisao.timestamp * 1000 | date:'dd/MM/yyyy HH:mm' }}</span>
+                @if (isRetificavel(decisao.status)) {
+                  <button class="btn-retificar" [routerLink]="['/emissor/retificar', decisao.documentHash]">
+                    Retificar
+                  </button>
+                }
+              </div>
+              <div class="card-body">
+                <div class="campo">
+                  <span class="label">Hash:</span>
+                  <code class="hash">{{ decisao.documentHash }}</code>
+                </div>
+                <div class="campos-grid">
+                  <div class="campo">
+                    <span class="label">Tribunal:</span>
+                    <span>{{ decisao.tribunalOrigem }}</span>
+                  </div>
+                  <div class="campo">
+                    <span class="label">Órgão Julgador:</span>
+                    <span>{{ decisao.orgaoJulgador }}</span>
+                  </div>
+                  <div class="campo">
+                    <span class="label">Canal:</span>
+                    <span>{{ decisao.canalTransmissao }}</span>
+                  </div>
+                  <div class="campo">
+                    <span class="label">Registrado por:</span>
+                    <code class="address">{{ decisao.registradoPor }}</code>
+                  </div>
+                </div>
+                @if (!isOriginal(decisao.hashAnterior)) {
+                  <div class="campo retificacao-info">
+                    <span class="label">↳ Retifica:</span>
+                    <code class="hash">{{ decisao.hashAnterior }}</code>
+                  </div>
+                }
+              </div>
+            </div>
+          </div>
+        }
+      </div>
+    </div>
+  }
+
+  <!-- Vazio -->
+  @if (!buscando() && !erro() && decisoes().length === 0 && buscou()) {
+    <p class="vazio">Nenhum registro encontrado para este processo.</p>
+  }
+</div>
