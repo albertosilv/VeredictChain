@@ -1,0 +1,101 @@
+<div class="retificar-container">
+  <h2>Retificar Decisão</h2>
+
+  <!-- Loading da decisão original -->
+  @if (carregandoOriginal()) {
+    <p class="loading">Carregando dados da decisão original...</p>
+  }
+
+  <!-- Erro ao carregar -->
+  @if (erroOriginal()) {
+    <div class="erro">{{ erroOriginal() }}</div>
+  }
+
+  <!-- Formulário de retificação -->
+  @if (!carregandoOriginal() && !erroOriginal() && original()) {
+    <div class="original-info">
+      <h3>
+        Retificando: v{{ indiceVersao() }}
+        <span class="status-badge" [class]="statusClass(original()!.status)">
+          {{ statusLabel(original()!.status) }}
+        </span>
+      </h3>
+      <p class="original-hash">
+        Hash anterior: <code>{{ original()!.documentHash }}</code>
+      </p>
+    </div>
+
+    <form class="retificar-form" (submit)="onSubmit(); $event.preventDefault()">
+      <!-- Upload novo documento -->
+      <div class="upload-area">
+        <label class="upload-label">
+          <span class="upload-icon">📄</span>
+          <span>Novo documento (PDF)</span>
+          <input type="file" accept=".pdf" (change)="onFileSelected($event)" class="upload-input" />
+        </label>
+        @if (form().novoArquivo) {
+          <p class="file-name">Selecionado: {{ form().novoArquivo.name }}</p>
+        }
+        @if (calculando()) {
+          <p class="calculando">Calculando hash SHA-256...</p>
+        }
+        @if (form().novoHash) {
+          <p class="hash-gerado">
+            Hash gerado: <code>{{ form().novoHash }}</code>
+          </p>
+        }
+      </div>
+
+      <!-- Campos editáveis (herdados da original) -->
+      <div class="campos">
+        <label>
+          Número do Processo
+          <input type="text" [ngModel]="form().numeroProcesso" (ngModelChange)="atualizarCampo('numeroProcesso', $event)" />
+        </label>
+        <label>
+          Tribunal de Origem
+          <input type="text" [ngModel]="form().tribunalOrigem" (ngModelChange)="atualizarCampo('tribunalOrigem', $event)" />
+        </label>
+        <label>
+          Órgão Julgador
+          <input type="text" [ngModel]="form().orgaoJulgador" (ngModelChange)="atualizarCampo('orgaoJulgador', $event)" />
+        </label>
+        <label>
+          Canal de Transmissão
+          <select [ngModel]="form().canalTransmissao" (ngModelChange)="atualizarCampo('canalTransmissao', $event)">
+            @for (canal of canais; track canal) {
+              <option [value]="canal">{{ canal }}</option>
+            }
+          </select>
+        </label>
+      </div>
+
+      <!-- Submit -->
+      @if (erro()) {
+        <div class="erro">{{ erro() }}</div>
+      }
+
+      @if (resultado()) {
+        <div class="sucesso">
+          ✅ Retificação registrada!<br />
+          Tx: <code>{{ resultado()!.txHash }}</code><br />
+          Novo hash: <code>{{ resultado()!.documentHash }}</code>
+        </div>
+      }
+
+      <div class="actions">
+        <button
+          type="submit"
+          class="btn-submit"
+          [disabled]="!podeEnviar() || enviando()"
+        >
+          {{ enviando() ? 'Enviando...' : 'Registrar Retificação' }}
+        </button>
+        <button type="button" class="btn-reset" (click)="reset()" [disabled]="enviando()">
+          Limpar
+        </button>
+        <a [routerLink]="['/emissor/consultar']" class="btn-voltar">Voltar</a>
+      </div>
+    </form>
+  }
+</div>
