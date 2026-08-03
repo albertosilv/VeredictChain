@@ -34,7 +34,7 @@
           <input type="file" accept=".pdf" (change)="onFileSelected($event)" class="upload-input" />
         </label>
         @if (form().novoArquivo) {
-          <p class="file-name">Selecionado: {{ form().novoArquivo.name }}</p>
+          <p class="file-name">Selecionado: {{ form().novoArquivo?.name }}</p>
         }
         @if (calculando()) {
           <p class="calculando">Calculando hash SHA-256...</p>
