@@ -39,6 +39,13 @@ export const routes: Routes = [
             m => m.ConsultarComponent,
           ),
       },
+      {
+        path: 'retificar/:documentHash',
+        loadComponent: () =>
+          import('./features/emissor/retificar/retificar.component').then(
+            m => m.RetificarComponent,
+          ),
+      },
     ],
   },
 ];
