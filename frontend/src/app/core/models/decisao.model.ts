@@ -16,7 +16,7 @@ export interface Decisao {
   canalTransmissao: string; // "DJe" | "SEEU" | "Malote Digital" | etc.
   timestamp: number; // Unix epoch (segundos)
   status: StatusDecisao;
-  hashAnterior: string | null; // null se registro original
+  hashAnterior: string; // 0x0000... se for registro original
   registradoPor: string; // endereço Ethereum do integrador
 }
 
