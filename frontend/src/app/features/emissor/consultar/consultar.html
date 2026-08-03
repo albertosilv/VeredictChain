@@ -2,18 +2,19 @@
   <h2>Consultar Processo</h2>
 
   <!-- Busca -->
-  <form class="busca-form" (submit)="onBuscar(); $event.preventDefault()">
+  <div class="busca-form">
     <input
       type="text"
       [ngModel]="numeroProcesso()"
       (ngModelChange)="numeroProcesso.set($event)"
+      (keyup.enter)="onBuscar()"
       placeholder="Número do processo (ex: 0001234-56.2026.8.15.0001)"
       class="busca-input"
     />
-    <button type="submit" class="btn-buscar" [disabled]="buscando() || !numeroProcesso()">
+    <button class="btn-buscar" [disabled]="buscando() || !numeroProcesso()" (click)="onBuscar()">
       {{ buscando() ? 'Buscando...' : 'Buscar' }}
     </button>
-  </form>
+  </div>
 
   <!-- Loading -->
   @if (buscando()) {
