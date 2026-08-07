@@ -24,7 +24,14 @@ export const routes: Routes = [
         m => m.EmissorShellComponent,
       ),
     children: [
-      { path: '', redirectTo: 'registrar', pathMatch: 'full' },
+      { path: '', redirectTo: 'minhas-decisoes', pathMatch: 'full' },
+      {
+        path: 'minhas-decisoes',
+        loadComponent: () =>
+          import('./features/emissor/minhas-decisoes/minhas-decisoes.component').then(
+            m => m.MinhasDecisoesComponent,
+          ),
+      },
       {
         path: 'registrar',
         loadComponent: () =>

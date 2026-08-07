@@ -173,6 +173,27 @@ h2 {
   background: #d97706;
 }
 
+.btn-arquivar {
+  padding: 0.35rem 0.85rem;
+  background: #6b7280;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.btn-arquivar:hover:not(:disabled) {
+  background: #4b5563;
+}
+
+.btn-arquivar:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
 .card-body {
   padding: 1rem;
 }

@@ -8,6 +8,11 @@ export interface RegistrarResultado {
   documentHash: string;
 }
 
+export interface ArquivarResultado {
+  txHash: string;
+  status: number;
+}
+
 /**
  * Serviço de comunicação com o backend integrador (NestJS).
  *
@@ -40,5 +45,13 @@ export class DecisaoService {
 
   retificar(input: DecisaoInput): Observable<RegistrarResultado> {
     return this.http.post<RegistrarResultado>(`${this.baseUrl}/retificar`, input);
+  }
+
+  /** Arquiva uma decisão judicial (status muda para Arquivada). */
+  arquivar(documentHash: string): Observable<ArquivarResultado> {
+    return this.http.post<ArquivarResultado>(
+      `${this.baseUrl}/${documentHash}/arquivar`,
+      {},
+    );
   }
 }

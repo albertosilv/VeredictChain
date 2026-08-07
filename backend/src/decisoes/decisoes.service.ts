@@ -101,6 +101,21 @@ export class DecisoesService {
   }
 
   // -------------------------------------------------------------------
+  // Arquivamento
+  // -------------------------------------------------------------------
+
+  async arquivarDecisao(documentHash: string): Promise<{ txHash: string; status: number }> {
+    this.logger.log(`Arquivando decisão: ${documentHash}`);
+
+    const tx = await this.contract.arquivarDecisao(documentHash);
+    const receipt = await tx.wait();
+    this.logger.log(`Decisão arquivada — tx: ${receipt.hash}`);
+
+    const [, decisao] = await this.contract.verificarDecisao(documentHash);
+    return { txHash: receipt.hash, status: Number(decisao.status) };
+  }
+
+  // -------------------------------------------------------------------
   // Helpers
   // -------------------------------------------------------------------
 

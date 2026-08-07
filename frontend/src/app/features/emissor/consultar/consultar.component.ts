@@ -37,6 +37,7 @@ export class ConsultarComponent {
   readonly buscando = signal(false);
   readonly buscou = signal(false);
   readonly erro = signal<string | null>(null);
+  readonly arquivando = signal<string | null>(null); // hash da decisão sendo arquivada
 
   onBuscar(): void {
     const processo = this.numeroProcesso().trim();
@@ -59,6 +60,28 @@ export class ConsultarComponent {
         this.buscou.set(true);
       },
     });
+  }
+
+  onArquivar(documentHash: string, event: Event): void {
+    event.stopPropagation();
+    if (this.arquivando()) return;
+
+    this.arquivando.set(documentHash);
+    this.decisaoService.arquivar(documentHash).subscribe({
+      next: () => {
+        this.arquivando.set(null);
+        // Recarrega a lista para refletir o novo status
+        this.onBuscar();
+      },
+      error: (err) => {
+        this.erro.set(err?.message ?? 'Erro ao arquivar decisão.');
+        this.arquivando.set(null);
+      },
+    });
+  }
+
+  isArquivavel(status: number): boolean {
+    return status === StatusDecisao.Publicada || status === StatusDecisao.Retificada;
   }
 
   // ── Helpers para o template ──────────────────────────────────
