@@ -1,0 +1,95 @@
+<div class="minhas-decisoes">
+  <h2>Minhas Decisões</h2>
+
+  <!-- ═══ IDENTIDADE DO MAGISTRADO ═══ -->
+  <section class="identidade-card">
+    <span class="identidade-icon">👨‍⚖️</span>
+    <div>
+      <strong>Magistrado autenticado</strong>
+      <code class="hash">{{ magistradoHash() }}</code>
+    </div>
+  </section>
+
+  <!-- ═══ DASHBOARD STATS ═══ -->
+  <section class="stats-grid">
+    <div class="stat-card">
+      <span class="stat-num">{{ totalDecisoes }}</span>
+      <span class="stat-label">Total de decisões</span>
+    </div>
+
+    @for (entry of porStatus | keyvalue; track entry.key) {
+      <div class="stat-card" [class]="'stat-' + entry.key.toLowerCase()">
+        <span class="stat-num">{{ entry.value }}</span>
+        <span class="stat-label">{{ entry.key }}</span>
+      </div>
+    }
+
+    <div class="stat-card stat-ultima">
+      <span class="stat-num-small">{{ ultimaAtualizacao }}</span>
+      <span class="stat-label">Última atualização</span>
+    </div>
+  </section>
+
+  <!-- ═══ LISTA DE DECISÕES ═══ -->
+  @if (carregando()) {
+    <p class="loading">Carregando decisões...</p>
+  } @else if (erro()) {
+    <div class="erro">{{ erro() }}</div>
+  } @else if (decisoes().length === 0) {
+    <div class="vazio">
+      <span class="vazio-icon">📭</span>
+      <p>Nenhuma decisão sua encontrada na blockchain.</p>
+      <a routerLink="/emissor/registrar" class="btn-registrar">Registrar nova decisão</a>
+    </div>
+  } @else {
+    <section class="lista-decisoes">
+      <h3>Suas decisões registradas</h3>
+
+      @for (decisao of decisoes(); track decisao.documentHash) {
+        <div class="decisao-card">
+          <!-- Status + Assinatura -->
+          <div class="card-top">
+            <span class="status-badge" [class]="statusClass(decisao.status)">
+              {{ statusIcon(decisao.status) }} {{ statusLabel(decisao.status) }}
+            </span>
+
+            <!-- ═══ T4.3: status da assinatura ═══ -->
+            <span class="assinatura-badge pendente" title="Assinatura digital pendente de implementação (T1)">
+              ⚠️ Assinatura pendente
+            </span>
+          </div>
+
+          <!-- Metadados -->
+          <div class="card-body">
+            <div class="campo">
+              <span class="label">Processo:</span>
+              <span>{{ decisao.numeroProcesso }}</span>
+            </div>
+            <div class="campos-grid">
+              <div class="campo">
+                <span class="label">Tribunal:</span>
+                <span>{{ decisao.tribunalOrigem }}</span>
+              </div>
+              <div class="campo">
+                <span class="label">Órgão Julgador:</span>
+                <span>{{ decisao.orgaoJulgador }}</span>
+              </div>
+              <div class="campo">
+                <span class="label">Canal:</span>
+                <span>{{ decisao.canalTransmissao }}</span>
+              </div>
+              <div class="campo">
+                <span class="label">Data:</span>
+                <span>{{ decisao.timestamp * 1000 | date:'dd/MM/yyyy HH:mm' }}</span>
+              </div>
+            </div>
+            <div class="campo hash-campo">
+              <span class="label">Hash do documento:</span>
+              <code>{{ decisao.documentHash }}</code>
+            </div>
+          </div>
+        </div>
+      }
+    </section>
+  }
+</div>
