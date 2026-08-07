@@ -1,5 +1,5 @@
-import { Controller, Post, Body, HttpCode, HttpStatus } from '@nestjs/common';
-import { DecisoesService, RegistrarResultado } from './decisoes.service';
+import { Controller, Get, Post, Body, Param, HttpCode, HttpStatus } from '@nestjs/common';
+import { DecisoesService, RegistrarResultado, DecisaoConsultada } from './decisoes.service';
 import { RegistrarDecisaoDto, RetificarDecisaoDto } from './dto/registrar-decisao.dto';
 
 @Controller('api/decisoes')
@@ -18,5 +18,21 @@ export class DecisoesController {
   @HttpCode(HttpStatus.CREATED)
   async retificar(@Body() dto: RetificarDecisaoDto): Promise<RegistrarResultado> {
     return this.decisoesService.retificarDecisao(dto);
+  }
+
+  /** Consulta o histórico completo de um número de processo. */
+  @Get('processo/:numeroProcesso')
+  async historicoPorProcesso(
+    @Param('numeroProcesso') numeroProcesso: string,
+  ): Promise<DecisaoConsultada[]> {
+    return this.decisoesService.historicoPorProcesso(numeroProcesso);
+  }
+
+  /** Consulta os metadados de uma decisão pelo hash do documento. */
+  @Get(':documentHash')
+  async buscarPorHash(
+    @Param('documentHash') documentHash: string,
+  ): Promise<DecisaoConsultada> {
+    return this.decisoesService.buscarPorHash(documentHash);
   }
 }
