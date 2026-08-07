@@ -1,0 +1,181 @@
+<div class="verificacao-publica">
+  <!-- ═══ CABEÇALHO ═══ -->
+  <header class="hero">
+    <h1>VeredictChain</h1>
+    <p class="subtitle">
+      Verificação pública de decisões judiciais na blockchain.
+      Faça upload de um documento para conferir sua autenticidade.
+    </p>
+  </header>
+
+  <!-- ═══ DROPZONE ═══ -->
+  <section class="dropzone-card">
+    <div
+      class="dropzone"
+      [class.has-file]="arquivo()"
+      [class.drag-over]="arrastando()"
+      (dragover)="onDragOver($event)"
+      (dragleave)="onDragLeave($event)"
+      (drop)="onDrop($event)"
+    >
+      <input
+        type="file"
+        id="arquivo-publico"
+        (change)="onFileSelected($event)"
+        accept=".pdf,.doc,.docx,.odt,.txt"
+      />
+      <label for="arquivo-publico">
+        @if (!arquivo()) {
+          <span class="drop-icon">📄</span>
+          <span class="drop-text">Arraste um documento aqui ou clique para selecionar</span>
+          <small>PDF, DOCX, ODT, TXT — o documento nunca sai do seu navegador</small>
+        } @else {
+          <span class="drop-icon">✅</span>
+          <span class="drop-text">{{ arquivo()!.name }}</span>
+          <small>{{ (arquivo()!.size / 1024).toFixed(1) }} KB</small>
+        }
+      </label>
+    </div>
+
+    <!-- Hash -->
+    @if (calculando()) {
+      <p class="status-calculando">⏳ Calculando hash SHA-256 do documento...</p>
+    }
+
+    @if (hash(); as h) {
+      <div class="hash-display">
+        <span class="hash-label">SHA-256 do documento:</span>
+        <code>{{ h }}</code>
+      </div>
+    }
+  </section>
+
+  <!-- ═══ RESULTADO ═══ -->
+  @if (erro()) {
+    <section class="resultado erro">
+      <span class="resultado-icon">⚠️</span>
+      <div>
+        <strong>Erro na consulta</strong>
+        <p>{{ erro() }}</p>
+      </div>
+    </section>
+  }
+
+  @if (resultado() === 'nao-encontrado') {
+    <section class="resultado nao-encontrado">
+      <span class="resultado-icon">❌</span>
+      <div>
+        <strong>Documento não encontrado na blockchain</strong>
+        <p>
+          O hash deste documento não consta no VeredictChain. Isso pode significar que:
+        </p>
+        <ul>
+          <li>O documento nunca foi registrado por um tribunal</li>
+          <li>O documento foi adulterado após o registro</li>
+          <li>O arquivo enviado não corresponde ao documento original</li>
+        </ul>
+      </div>
+    </section>
+  }
+
+  @if (resultado() === 'autentico' && decisao(); as d) {
+    <section class="resultado autentico">
+      <span class="resultado-icon">✅</span>
+      <div>
+        <strong>Documento autêntico</strong>
+        <p>
+          Este documento está registrado na blockchain e seu conteúdo
+          <strong>não foi adulterado</strong> desde o registro.
+        </p>
+      </div>
+    </section>
+
+    <!-- ═══ METADADOS ═══ -->
+    <section class="metadados">
+      <h2>Metadados do Registro</h2>
+
+      <div class="metadados-grid">
+        <div class="campo">
+          <span class="campo-label">Nº do Processo</span>
+          <span class="campo-valor">{{ d.numeroProcesso }}</span>
+        </div>
+
+        <div class="campo">
+          <span class="campo-label">Tribunal</span>
+          <span class="campo-valor">{{ d.tribunalOrigem }}</span>
+        </div>
+
+        <div class="campo">
+          <span class="campo-label">Órgão Julgador</span>
+          <span class="campo-valor">{{ d.orgaoJulgador }}</span>
+        </div>
+
+        <div class="campo">
+          <span class="campo-label">Canal de Transmissão</span>
+          <span class="campo-valor">{{ d.canalTransmissao }}</span>
+        </div>
+
+        <div class="campo">
+          <span class="campo-label">Status</span>
+          <span class="campo-valor status-badge" [class]="'status-' + statusClass(d.status)">
+            {{ statusLabel(d.status) }}
+          </span>
+        </div>
+
+        <div class="campo">
+          <span class="campo-label">Registrado em</span>
+          <span class="campo-valor">{{ d.timestamp * 1000 | date:'dd/MM/yyyy HH:mm:ss' }}</span>
+        </div>
+
+        <div class="campo full-width">
+          <span class="campo-label">Hash do Documento</span>
+          <code class="campo-valor mono">{{ d.documentHash }}</code>
+        </div>
+
+        <div class="campo full-width">
+          <span class="campo-label">Hash do Magistrado (ICP-Brasil)</span>
+          <code class="campo-valor mono">{{ d.magistradoHash }}</code>
+        </div>
+
+        @if (!isOriginal(d.hashAnterior)) {
+          <div class="campo full-width">
+            <span class="campo-label">Versão Anterior</span>
+            <code class="campo-valor mono">{{ d.hashAnterior }}</code>
+          </div>
+        }
+
+        <div class="campo full-width">
+          <span class="campo-label">Registrado por (Integrador)</span>
+          <code class="campo-valor mono">{{ d.registradoPor }}</code>
+        </div>
+      </div>
+
+      <!-- ═══ ASSINATURA (placeholder para T1) ═══ -->
+      <div class="assinatura-placeholder">
+        <span>🔐</span>
+        <span>Verificação de assinatura digital do magistrado estará disponível em breve.</span>
+      </div>
+    </section>
+  }
+
+  <!-- ═══ ESTADO INICIAL ═══ -->
+  @if (!hash() && !erro() && !resultado()) {
+    <section class="info-box">
+      <h2>Como funciona?</h2>
+      <ol>
+        <li>
+          <strong>Faça upload</strong> de um documento judicial (decisão, sentença, acórdão).
+        </li>
+        <li>
+          O <strong>hash SHA-256</strong> é calculado no seu navegador — o documento nunca sai do seu computador.
+        </li>
+        <li>
+          O hash é consultado na <strong>blockchain</strong> do VeredictChain.
+        </li>
+        <li>
+          Se encontrado, você vê todos os <strong>metadados públicos</strong>: tribunal, magistrado, data e status.
+        </li>
+      </ol>
+    </section>
+  }
+</div>
