@@ -30,3 +30,7 @@ backend/node_modules/
 
 # Frontend (já coberto pelo angular.json, mas redundância não faz mal)
 frontend/dist/
+
+# Documentação de agente (específica do ambiente de desenvolvimento)
+AGENTS.md
+assinatura-digital-spec.md
