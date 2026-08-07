@@ -51,6 +51,15 @@
                     Retificar
                   </button>
                 }
+                @if (isArquivavel(decisao.status)) {
+                  <button
+                    class="btn-arquivar"
+                    [disabled]="arquivando() === decisao.documentHash"
+                    (click)="onArquivar(decisao.documentHash, $event)"
+                  >
+                    {{ arquivando() === decisao.documentHash ? 'Arquivando...' : 'Arquivar' }}
+                  </button>
+                }
               </div>
               <div class="card-body">
                 <div class="campo">
