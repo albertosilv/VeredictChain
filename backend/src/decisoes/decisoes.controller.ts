@@ -35,4 +35,13 @@ export class DecisoesController {
   ): Promise<DecisaoConsultada> {
     return this.decisoesService.buscarPorHash(documentHash);
   }
+
+  /** Arquiva uma decisão judicial (status muda para Arquivada). */
+  @Post(':documentHash/arquivar')
+  @HttpCode(HttpStatus.OK)
+  async arquivar(
+    @Param('documentHash') documentHash: string,
+  ): Promise<{ txHash: string; status: number }> {
+    return this.decisoesService.arquivarDecisao(documentHash);
+  }
 }
