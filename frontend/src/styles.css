@@ -1,3 +1,90 @@
-/* You can add global styles to this file, and also import other style files */
+/* ═══════════════════════════════════════════════════════
+   VeredictChain — Design System (Tailwind v4 @theme)
+   ═══════════════════════════════════════════════════════ */
 
 @import 'tailwindcss';
+
+@theme {
+  /* ── Font Family ──────────────────────────────────── */
+  --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif;
+  --font-mono: 'Fira Code', 'Cascadia Code', ui-monospace, monospace;
+
+  /* ── Colors: Semantic Tokens ──────────────────────── */
+
+  /* Primary — Blue 600 (ações, links, ênfase) */
+  --color-primary: #2563eb;
+  --color-primary-hover: #1d4ed8;
+  --color-primary-light: #dbeafe;
+  --color-primary-bg: #eff6ff;
+
+  /* Surface — fundos */
+  --color-surface: #ffffff;
+  --color-surface-alt: #f8fafc;
+  --color-surface-hover: #f1f5f9;
+  --color-surface-dark: #1e293b;
+
+  /* Border */
+  --color-border: #e2e8f0;
+  --color-border-light: #f1f5f9;
+
+  /* Text */
+  --color-text: #0f172a;
+  --color-text-secondary: #475569;
+  --color-text-muted: #94a3b8;
+  --color-text-inverse: #ffffff;
+
+  /* Status — Success (Emerald) */
+  --color-success: #059669;
+  --color-success-bg: #ecfdf5;
+  --color-success-border: #a7f3d0;
+
+  /* Status — Warning (Amber) */
+  --color-warning: #d97706;
+  --color-warning-bg: #fffbeb;
+  --color-warning-border: #fde68a;
+
+  /* Status — Danger (Red) */
+  --color-danger: #dc2626;
+  --color-danger-bg: #fef2f2;
+  --color-danger-border: #fecaca;
+
+  /* Status — Info (Blue) */
+  --color-info: #3b82f6;
+  --color-info-text: #1e40af;
+
+  /* ── Text Sizes: Semantic Scale ──────────────────── */
+
+  --text-caption: 0.75rem;
+  --text-caption--line-height: 1rem;
+
+  --text-body-sm: 0.8125rem;
+  --text-body-sm--line-height: 1.25rem;
+
+  --text-body: 0.9375rem;
+  --text-body--line-height: 1.5rem;
+
+  --text-label: 0.875rem;
+  --text-label--line-height: 1.25rem;
+  --text-label--font-weight: 600;
+
+  --text-heading-sm: 1.125rem;
+  --text-heading-sm--line-height: 1.5rem;
+  --text-heading-sm--font-weight: 600;
+
+  --text-heading: 1.5rem;
+  --text-heading--line-height: 2rem;
+  --text-heading--font-weight: 700;
+
+  --text-heading-lg: 1.875rem;
+  --text-heading-lg--line-height: 2.25rem;
+  --text-heading-lg--font-weight: 700;
+
+  /* ── Radius ──────────────────────────────────────── */
+  --radius-default: 0.5rem;
+  --radius-sm: 0.375rem;
+  --radius-full: 9999px;
+
+  /* ── Shadows ─────────────────────────────────────── */
+  --shadow-card: 0 1px 3px rgba(0, 0, 0, 0.04);
+  --shadow-card-hover: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
