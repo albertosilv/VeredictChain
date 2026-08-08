@@ -1,37 +1,43 @@
-<div class="consultar-container">
-  <h2>Consultar Processo</h2>
+<div class="max-w-[800px] mx-auto py-8 px-4">
+  <h2 class="text-heading text-text mb-6">Consultar Processo</h2>
 
   <!-- Busca -->
-  <div class="busca-form">
+  <div class="flex gap-3 mb-8">
     <input
       type="text"
       [ngModel]="numeroProcesso()"
       (ngModelChange)="numeroProcesso.set($event)"
       (keyup.enter)="onBuscar()"
       placeholder="Número do processo (ex: 0001234-56.2026.8.15.0001)"
-      class="busca-input"
+      class="flex-1 px-4 py-3 border border-border rounded-default text-body focus:outline-none focus:border-primary focus:shadow-[0_0_0_3px_rgba(37,99,235,0.15)] transition-colors"
     />
-    <button class="btn-buscar" [disabled]="buscando() || !numeroProcesso()" (click)="onBuscar()">
+    <button
+      class="px-6 py-3 bg-primary text-text-inverse border-none rounded-default font-semibold cursor-pointer hover:bg-primary-hover disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+      [disabled]="buscando() || !numeroProcesso()"
+      (click)="onBuscar()"
+    >
       {{ buscando() ? 'Buscando...' : 'Buscar' }}
     </button>
   </div>
 
   <!-- Loading -->
   @if (buscando()) {
-    <p class="loading">Consultando blockchain...</p>
+    <p class="text-center text-text-muted py-8">Consultando blockchain...</p>
   }
 
   <!-- Erro -->
   @if (erro()) {
-    <div class="erro">{{ erro() }}</div>
+    <div class="bg-danger-bg text-danger border border-danger-border rounded-default p-4 mb-6">{{ erro() }}</div>
   }
 
   <!-- Resultado -->
   @if (decisoes().length > 0) {
-    <div class="resultado">
-      <h3>
+    <div>
+      <h3 class="text-heading-sm text-text mb-6">
         Processo: {{ decisoes()[0].numeroProcesso }}
-        <span class="badge-versao">{{ decisoes().length }} versão{{ decisoes().length > 1 ? 'ões' : '' }}</span>
+        <span class="inline-block bg-primary-light text-[#3730a3] text-caption px-2.5 py-1 rounded-full ml-2 align-middle">
+          {{ decisoes().length }} versão{{ decisoes().length > 1 ? 'ões' : '' }}
+        </span>
       </h3>
 
       <div class="timeline">
@@ -42,18 +48,20 @@
                 {{ statusLabel(decisao.status) }}
               </span>
             </div>
-            <div class="timeline-card">
-              <div class="card-header">
-                <span class="versao-label">v{{ i + 1 }}</span>
-                <span class="data">{{ decisao.timestamp * 1000 | date:'dd/MM/yyyy HH:mm' }}</span>
+            <div class="flex-1 bg-surface border border-border rounded-default overflow-hidden hover:shadow-card-hover transition-shadow">
+              <!-- Card header -->
+              <div class="flex items-center gap-3 px-4 py-3 bg-surface-alt border-b border-border">
+                <span class="font-bold text-caption text-text-secondary bg-border px-2 py-0.5 rounded-sm">v{{ i + 1 }}</span>
+                <span class="text-caption text-text-muted flex-1">{{ decisao.timestamp * 1000 | date:'dd/MM/yyyy HH:mm' }}</span>
                 @if (isRetificavel(decisao.status)) {
-                  <button class="btn-retificar" [routerLink]="['/emissor/retificar', decisao.documentHash]">
-                    Retificar
-                  </button>
+                  <a
+                    [routerLink]="['/emissor/retificar', decisao.documentHash]"
+                    class="px-3.5 py-1.5 bg-warning text-text-inverse border-none rounded-sm text-caption font-semibold cursor-pointer no-underline hover:bg-[#d97706] transition-colors"
+                  >Retificar</a>
                 }
                 @if (isArquivavel(decisao.status)) {
                   <button
-                    class="btn-arquivar"
+                    class="px-3.5 py-1.5 bg-text-muted text-text-inverse border-none rounded-sm text-caption font-semibold cursor-pointer hover:bg-text-secondary disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                     [disabled]="arquivando() === decisao.documentHash"
                     (click)="onArquivar(decisao.documentHash, $event)"
                   >
@@ -61,33 +69,34 @@
                   </button>
                 }
               </div>
-              <div class="card-body">
-                <div class="campo">
-                  <span class="label">Hash:</span>
-                  <code class="hash">{{ decisao.documentHash }}</code>
+              <!-- Card body -->
+              <div class="p-4">
+                <div class="mb-2 text-body">
+                  <span class="font-semibold text-text-secondary mr-2">Hash:</span>
+                  <code class="font-mono text-body-sm bg-surface-alt px-1.5 py-0.5 rounded-sm break-all">{{ decisao.documentHash }}</code>
                 </div>
-                <div class="campos-grid">
-                  <div class="campo">
-                    <span class="label">Tribunal:</span>
+                <div class="grid grid-cols-2 gap-x-6 gap-y-2 mt-2">
+                  <div class="text-body">
+                    <span class="font-semibold text-text-secondary mr-2">Tribunal:</span>
                     <span>{{ decisao.tribunalOrigem }}</span>
                   </div>
-                  <div class="campo">
-                    <span class="label">Órgão Julgador:</span>
+                  <div class="text-body">
+                    <span class="font-semibold text-text-secondary mr-2">Órgão Julgador:</span>
                     <span>{{ decisao.orgaoJulgador }}</span>
                   </div>
-                  <div class="campo">
-                    <span class="label">Canal:</span>
+                  <div class="text-body">
+                    <span class="font-semibold text-text-secondary mr-2">Canal:</span>
                     <span>{{ decisao.canalTransmissao }}</span>
                   </div>
-                  <div class="campo">
-                    <span class="label">Registrado por:</span>
-                    <code class="address">{{ decisao.registradoPor }}</code>
+                  <div class="text-body">
+                    <span class="font-semibold text-text-secondary mr-2">Registrado por:</span>
+                    <code class="font-mono text-body-sm bg-surface-alt px-1.5 py-0.5 rounded-sm break-all">{{ decisao.registradoPor }}</code>
                   </div>
                 </div>
                 @if (!isOriginal(decisao.hashAnterior)) {
-                  <div class="campo retificacao-info">
-                    <span class="label">↳ Retifica:</span>
-                    <code class="hash">{{ decisao.hashAnterior }}</code>
+                  <div class="mt-3 pt-3 border-t border-dashed border-border text-body">
+                    <span class="font-semibold text-text-secondary mr-2">↳ Retifica:</span>
+                    <code class="font-mono text-body-sm bg-surface-alt px-1.5 py-0.5 rounded-sm break-all">{{ decisao.hashAnterior }}</code>
                   </div>
                 }
               </div>
@@ -100,6 +109,6 @@
 
   <!-- Vazio -->
   @if (!buscando() && !erro() && decisoes().length === 0 && buscou()) {
-    <p class="vazio">Nenhum registro encontrado para este processo.</p>
+    <p class="text-center text-text-muted py-8">Nenhum registro encontrado para este processo.</p>
   }
 </div>
