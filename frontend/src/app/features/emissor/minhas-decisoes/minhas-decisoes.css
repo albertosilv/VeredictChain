@@ -1,263 +1,27 @@
 /* ═══════════════════════════════════════════════
-   Minhas Decisões — Painel do Magistrado
+   Minhas Decisões — estilos residuais
+   (status badges aplicados dinamicamente via [class])
    ═══════════════════════════════════════════════ */
-
-.minhas-decisoes {
-  max-width: 860px;
-  margin: 0 auto;
-  padding: 1rem 0;
-}
-
-h2 {
-  font-size: 1.5rem;
-  font-weight: 700;
-  margin: 0 0 1.5rem;
-  color: #1a1a2e;
-}
-
-/* ── Identidade ─────────────────────────────── */
-
-.identidade-card {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  background: linear-gradient(135deg, #1e293b, #334155);
-  color: white;
-  padding: 1rem 1.25rem;
-  border-radius: 10px;
-  margin-bottom: 1.5rem;
-
-  .identidade-icon {
-    font-size: 1.5rem;
-  }
-
-  strong {
-    display: block;
-    font-size: 0.85rem;
-    margin-bottom: 0.2rem;
-    color: #cbd5e1;
-  }
-
-  code.hash {
-    font-size: 0.75rem;
-    word-break: break-all;
-    color: #93c5fd;
-    background: rgba(0, 0, 0, 0.3);
-    padding: 0.15rem 0.4rem;
-    border-radius: 4px;
-  }
-}
-
-/* ── Stats Grid ─────────────────────────────── */
-
-.stats-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-  gap: 1rem;
-  margin-bottom: 1.5rem;
-}
-
-.stat-card {
-  background: white;
-  border: 1px solid #e5e7eb;
-  border-radius: 10px;
-  padding: 1.25rem;
-  text-align: center;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
-
-  .stat-num {
-    font-size: 2rem;
-    font-weight: 700;
-    color: #1e293b;
-    display: block;
-  }
-
-  .stat-num-small {
-    font-size: 0.85rem;
-    font-weight: 600;
-    color: #1e293b;
-    display: block;
-  }
-
-  .stat-label {
-    font-size: 0.8rem;
-    color: #64748b;
-    margin-top: 0.25rem;
-    display: block;
-  }
-}
-
-.stat-publicada .stat-num {
-  color: #065f46;
-}
-
-.stat-retificada .stat-num {
-  color: #92400e;
-}
-
-.stat-arquivada .stat-num {
-  color: #4b5563;
-}
-
-/* ── Loading / Error / Empty ─────────────────── */
-
-.loading,
-.vazio {
-  text-align: center;
-  color: #6b7280;
-  padding: 3rem 0;
-}
-
-.vazio-icon {
-  font-size: 3rem;
-  display: block;
-  margin-bottom: 0.5rem;
-}
-
-.erro {
-  background: #fef2f2;
-  color: #b91c1c;
-  border: 1px solid #fecaca;
-  border-radius: 8px;
-  padding: 1rem;
-  margin-bottom: 1.5rem;
-}
-
-.btn-registrar {
-  display: inline-block;
-  margin-top: 1rem;
-  padding: 0.6rem 1.5rem;
-  background: #2563eb;
-  color: white;
-  border-radius: 8px;
-  text-decoration: none;
-  font-weight: 600;
-  font-size: 0.9rem;
-  transition: background 0.15s;
-
-  &:hover {
-    background: #1d4ed8;
-  }
-}
-
-/* ── Lista de Decisões ──────────────────────── */
-
-.lista-decisoes {
-  h3 {
-    font-size: 1.1rem;
-    font-weight: 600;
-    color: #1e293b;
-    margin: 0 0 1rem;
-  }
-}
-
-.decisao-card {
-  background: white;
-  border: 1px solid #e5e7eb;
-  border-radius: 10px;
-  margin-bottom: 1rem;
-  overflow: hidden;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
-  transition: box-shadow 0.15s;
-
-  &:hover {
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
-  }
-}
-
-.card-top {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0.75rem 1rem;
-  background: #f9fafb;
-  border-bottom: 1px solid #e5e7eb;
-}
-
-.card-body {
-  padding: 1rem;
-}
-
-/* ── Status badges ──────────────────────────── */
 
 .status-badge {
   display: inline-block;
-  font-size: 0.8rem;
+  font-size: var(--text-caption);
   font-weight: 600;
-  padding: 0.2rem 0.6rem;
-  border-radius: 6px;
+  padding: 0.25rem 0.625rem;
+  border-radius: var(--radius-sm);
 }
 
 .status-publicada {
-  background: #d1fae5;
-  color: #065f46;
+  background: var(--color-success-bg);
+  color: var(--color-success);
 }
 
 .status-retificada {
-  background: #fef3c7;
-  color: #92400e;
+  background: var(--color-warning-bg);
+  color: var(--color-warning);
 }
 
 .status-arquivada {
-  background: #e5e7eb;
-  color: #4b5563;
-}
-
-/* ── Assinatura badge (T4.3) ────────────────── */
-
-.assinatura-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.3rem;
-  font-size: 0.75rem;
-  font-weight: 600;
-  padding: 0.2rem 0.6rem;
-  border-radius: 6px;
-
-  &.pendente {
-    background: #fffbeb;
-    color: #92400e;
-    border: 1px solid #fde68a;
-  }
-
-  &.assinado {
-    background: #f0fdf4;
-    color: #166534;
-    border: 1px solid #bbf7d0;
-  }
-}
-
-/* ── Campos ──────────────────────────────────── */
-
-.campo {
-  margin-bottom: 0.4rem;
-  font-size: 0.9rem;
-
-  .label {
-    font-weight: 600;
-    color: #6b7280;
-    margin-right: 0.5rem;
-  }
-
-  code {
-    font-family: 'Fira Code', 'Cascadia Code', monospace;
-    font-size: 0.78rem;
-    background: #f3f4f6;
-    padding: 0.1rem 0.35rem;
-    border-radius: 4px;
-    word-break: break-all;
-  }
-}
-
-.hash-campo code {
-  display: block;
-  margin-top: 0.2rem;
-}
-
-.campos-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 0.4rem 1.5rem;
-  margin-top: 0.5rem;
-  margin-bottom: 0.5rem;
+  background: var(--color-border);
+  color: var(--color-text-muted);
 }
