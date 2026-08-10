@@ -44,7 +44,8 @@
         @for (decisao of decisoes(); track decisao.documentHash; let i = $index) {
           <div class="timeline-item" [class.ultima]="i === decisoes().length - 1">
             <div class="timeline-marker">
-              <span class="status-badge" [class]="statusClass(decisao.status)">
+              <span class="status-dot" [class]="statusClass(decisao.status)"></span>
+              <span class="status-label" [class]="statusClass(decisao.status)">
                 {{ statusLabel(decisao.status) }}
               </span>
             </div>
