@@ -3,7 +3,6 @@
 
   <!-- ═══ IDENTIDADE DO MAGISTRADO ═══ -->
   <section class="flex items-center gap-3 bg-surface-dark text-text-inverse p-4 rounded-default mb-6">
-    <span class="text-2xl">👨‍⚖️</span>
     <div>
       <strong class="block text-caption text-slate-300 mb-0.5">Magistrado autenticado</strong>
       <code class="text-caption break-all text-blue-300 bg-black/30 px-1.5 py-0.5 rounded-sm">{{ magistradoHash() }}</code>
@@ -38,7 +37,6 @@
   <!-- ═══ ALERTA DE AUDITORIA ═══ -->
   @if (comMagistradoRevogado > 0) {
     <section class="alerta-auditoria">
-      <span class="alerta-auditoria__icone">⚠️</span>
       <div>
         <strong class="alerta-auditoria__titulo">Atenção: credenciamento revogado após o registro</strong>
         <p class="alerta-auditoria__texto">
@@ -58,7 +56,6 @@
     <div class="bg-danger-bg text-danger border border-danger-border rounded-default p-4 mb-6">{{ erro() }}</div>
   } @else if (decisoes().length === 0) {
     <div class="text-center text-text-muted py-12">
-      <span class="block text-5xl mb-2">📭</span>
       <p class="mb-4">Nenhuma decisão sua encontrada na blockchain.</p>
       <a
         routerLink="/emissor/registrar"
@@ -74,7 +71,7 @@
           <!-- Status + Assinatura -->
           <div class="flex items-center justify-between px-4 py-3 bg-surface-alt border-b border-border">
             <span class="status-badge" [class]="statusClass(decisao.status)">
-              {{ statusIcon(decisao.status) }} {{ statusLabel(decisao.status) }}
+              {{ statusLabel(decisao.status) }}
             </span>
 
             <!-- ═══ T4.3: status da assinatura ═══ -->
@@ -82,7 +79,7 @@
               class="inline-flex items-center gap-1 text-caption font-semibold px-2.5 py-1 rounded-sm bg-warning-bg text-warning border border-warning-border"
               title="Assinatura digital pendente de implementação (T1)"
             >
-              ⚠️ Assinatura pendente
+              Assinatura pendente
             </span>
           </div>
 

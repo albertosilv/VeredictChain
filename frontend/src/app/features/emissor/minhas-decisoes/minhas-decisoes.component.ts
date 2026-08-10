@@ -7,7 +7,6 @@ import type { Decisao } from '../../../core/models/decisao.model';
 import {
   statusLabel as obterStatusLabel,
   statusClass as obterStatusClass,
-  statusIcon as obterStatusIcon,
 } from '../../../core/utils/status-decisao';
 import { extrairMensagemErro } from '../../../core/utils/erro.util';
 
@@ -97,9 +96,5 @@ export class MinhasDecisoesComponent implements OnInit {
 
   statusClass(status: number): string {
     return obterStatusClass(status);
-  }
-
-  statusIcon(status: number): string {
-    return obterStatusIcon(status);
   }
 }
