@@ -1,1 +1,1 @@
-export { BlockchainModule, VEREDICT_CONTRACT } from './blockchain.module';
+export { BlockchainModule, VEREDICT_CONTRACT, NONCE_MANAGED_SIGNER } from './blockchain.module';

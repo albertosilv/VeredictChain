@@ -3,16 +3,10 @@ import { DatePipe } from '@angular/common';
 import { HashService } from '../../../core/services/hash.service';
 import { DecisaoService } from '../../../core/services/decisao.service';
 import type { Decisao } from '../../../core/models/decisao.model';
-import { StatusDecisao } from '../../../core/models/decisao.model';
+import { statusLabel as obterStatusLabel, statusClass as obterStatusClass } from '../../../core/utils/status-decisao';
+import { extrairMensagemErro } from '../../../core/utils/erro.util';
 
 const ZERO_HASH = '0x0000000000000000000000000000000000000000000000000000000000000000';
-
-const STATUS_LABELS: Record<number, string> = {
-  [StatusDecisao.Inexistente]: 'Inexistente',
-  [StatusDecisao.Publicada]: 'Publicada',
-  [StatusDecisao.Retificada]: 'Retificada',
-  [StatusDecisao.Arquivada]: 'Arquivada',
-};
 
 type ResultadoTipo = 'autentico' | 'nao-encontrado' | null;
 
@@ -123,7 +117,7 @@ export class DropzoneComponent {
           this.resultado.set('nao-encontrado');
         } else {
           this.erro.set(
-            err?.message ?? 'Erro ao consultar a blockchain. Verifique sua conexão.',
+            extrairMensagemErro(err, 'Erro ao consultar a blockchain. Verifique sua conexão.'),
           );
         }
         this.consultando.set(false);
@@ -134,20 +128,11 @@ export class DropzoneComponent {
   // ── Helpers para o template ─────────────────────────────────
 
   statusLabel(status: number): string {
-    return STATUS_LABELS[status] ?? 'Desconhecido';
+    return obterStatusLabel(status);
   }
 
   statusClass(status: number): string {
-    switch (status) {
-      case StatusDecisao.Publicada:
-        return 'publicada';
-      case StatusDecisao.Retificada:
-        return 'retificada';
-      case StatusDecisao.Arquivada:
-        return 'arquivada';
-      default:
-        return '';
-    }
+    return obterStatusClass(status);
   }
 
   isOriginal(hashAnterior: string): boolean {

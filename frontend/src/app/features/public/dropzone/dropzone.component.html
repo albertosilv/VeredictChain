@@ -121,7 +121,7 @@
 
         <div class="flex flex-col gap-1">
           <span class="text-caption font-semibold text-text-secondary uppercase tracking-wider">Status</span>
-          <span class="status-badge w-fit" [class]="'status-' + statusClass(d.status)">
+          <span class="status-badge w-fit" [class]="statusClass(d.status)">
             {{ statusLabel(d.status) }}
           </span>
         </div>

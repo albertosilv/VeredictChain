@@ -32,11 +32,15 @@
       <p class="mt-3 text-body-sm text-text-secondary">⏳ Calculando hash SHA-256...</p>
     }
 
-    @if (form().documentHash) {
+    @if (form().hashPreview) {
       <div class="mt-3 bg-surface-alt rounded-sm px-3 py-2.5 flex items-center gap-2">
-        <span class="text-caption font-semibold text-text-secondary whitespace-nowrap">SHA-256:</span>
-        <code class="text-body-sm text-text break-all">{{ form().documentHash }}</code>
+        <span class="text-caption font-semibold text-text-secondary whitespace-nowrap">SHA-256 (prévia local):</span>
+        <code class="text-body-sm text-text break-all">{{ form().hashPreview }}</code>
       </div>
+      <p class="mt-1 text-caption text-text-muted">
+        Esta é apenas uma prévia calculada no seu navegador. O hash oficial é recalculado
+        pelo servidor a partir do arquivo enviado no momento do registro.
+      </p>
     }
   </section>
 
@@ -95,10 +99,27 @@
         </select>
       </label>
 
+      @if (form().canalTransmissao === 'Outro') {
+        <label class="flex flex-col gap-1 text-label text-text-secondary">
+          Detalhe do canal
+          <input
+            type="text"
+            [ngModel]="form().canalTransmissaoDetalhe"
+            (ngModelChange)="form.update(f => ({ ...f, canalTransmissaoDetalhe: $event }))"
+            name="canalTransmissaoDetalhe"
+            maxlength="30"
+            placeholder="Ex: ofício circular manual"
+            class="px-3 py-2 border border-border rounded-sm text-body focus:outline-none focus:border-primary focus:shadow-[0_0_0_2px_rgba(37,99,235,0.15)] transition-colors"
+          />
+        </label>
+      }
+
       <div class="col-span-2 flex flex-col gap-1 bg-surface-alt border border-border rounded-sm px-3 py-2.5">
-        <span class="text-label text-text-secondary">Magistrado (hash ICP-Brasil)</span>
-        <code class="text-body-sm text-text-muted break-all">{{ magistradoHash() }}</code>
-        <small class="text-caption text-text-muted">Hash associado ao login — preenchido automaticamente.</small>
+        <span class="text-label text-text-secondary">Magistrado</span>
+        <small class="text-caption text-text-muted">
+          Identificado automaticamente pela sua sessão autenticada — não é enviado pelo
+          formulário, o servidor associa o registro ao seu login.
+        </small>
       </div>
     </div>
   </section>

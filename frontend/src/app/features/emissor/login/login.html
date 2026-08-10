@@ -31,7 +31,8 @@
 
     <button
       type="submit"
-      class="py-2.5 bg-primary text-text-inverse border-none rounded-sm text-body cursor-pointer hover:bg-primary-hover transition-colors"
-    >Entrar</button>
+      [disabled]="enviando()"
+      class="py-2.5 bg-primary text-text-inverse border-none rounded-sm text-body cursor-pointer hover:bg-primary-hover transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+    >{{ enviando() ? 'Entrando...' : 'Entrar' }}</button>
   </form>
 </div>

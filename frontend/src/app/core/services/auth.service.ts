@@ -1,44 +1,91 @@
-import { Injectable, signal, computed } from '@angular/core';
+import { Injectable, signal, computed, inject, PLATFORM_ID } from '@angular/core';
+import { isPlatformBrowser } from '@angular/common';
+import { HttpClient } from '@angular/common/http';
+import { Observable, map, catchError, of } from 'rxjs';
 
-interface Credenciais {
-  usuario: string;
-  senha: string;
+interface LoginResponse {
+  accessToken: string;
+  expiresIn: string;
+  magistradoHash: string;
+}
+
+/** Chave usada para persistir a sessão no sessionStorage do navegador. */
+const STORAGE_KEY = 'veredictchain.session';
+
+interface SessaoPersistida {
+  accessToken: string;
   magistradoHash: string;
 }
 
 /**
- * Hash do magistrado usado no deploy do contrato.
- * Em produção, isso viria do ICP-Brasil (hash do certificado digital).
- * Para o mock, usamos um hash de exemplo fixo, consistente com o deploy.
+ * Serviço de autenticação.
+ *
+ * A autenticação REAL acontece no backend (POST /api/auth/login), que valida
+ * a credencial com bcrypt e emite um JWT assinado pelo servidor. Este serviço
+ * apenas guarda o token e o expõe para o resto do app — ele NÃO decide sozinho
+ * quem está autenticado; isso é sempre reverificado pelo backend em cada
+ * requisição protegida (ver JwtAuthGuard no NestJS).
+ *
+ * O token é persistido em sessionStorage só para sobreviver a um F5 da página
+ * durante a sessão do navegador — nunca em localStorage (evita persistência
+ * indefinida) e nunca em cookie sem as flags adequadas (fora de escopo aqui).
  */
-/** Hash gerado pelo deploy: keccak256("cert-icp-brasil-des-frederico-coutinho") */
-const MOCK_CREDENCIAIS: Credenciais = {
-  usuario: 'magistrado',
-  senha: 'tjpB2026',
-  magistradoHash:
-    '0x1f3d89c259932131898eba5c76186e6b44d0e4a152456d70ce3063ad56c2094b',
-};
-
 @Injectable({ providedIn: 'root' })
 export class AuthService {
-  private readonly _autenticado = signal(false);
+  private readonly http = inject(HttpClient);
+  private readonly platformId = inject(PLATFORM_ID);
+  private readonly baseUrl = 'http://localhost:3000/api/auth';
+
+  private readonly _accessToken = signal<string | null>(null);
   private readonly _magistradoHash = signal<string | null>(null);
 
-  readonly autenticado = this._autenticado.asReadonly();
-  readonly isLoggedIn = computed(() => this._autenticado());
+  readonly isLoggedIn = computed(() => this._accessToken() !== null);
   readonly magistradoHash = this._magistradoHash.asReadonly();
+  readonly accessToken = this._accessToken.asReadonly();
 
-  login(usuario: string, senha: string): boolean {
-    if (usuario === MOCK_CREDENCIAIS.usuario && senha === MOCK_CREDENCIAIS.senha) {
-      this._autenticado.set(true);
-      this._magistradoHash.set(MOCK_CREDENCIAIS.magistradoHash);
-      return true;
-    }
-    return false;
+  constructor() {
+    this.restaurarSessao();
+  }
+
+  /** Efetua login contra o backend. Retorna `true` em caso de sucesso. */
+  login(usuario: string, senha: string): Observable<boolean> {
+    return this.http.post<LoginResponse>(`${this.baseUrl}/login`, { usuario, senha }).pipe(
+      map((res) => {
+        this._accessToken.set(res.accessToken);
+        this._magistradoHash.set(res.magistradoHash);
+        this.persistirSessao({ accessToken: res.accessToken, magistradoHash: res.magistradoHash });
+        return true;
+      }),
+      // 401 (credenciais inválidas) ou qualquer outro erro de rede → false.
+      catchError(() => of(false)),
+    );
   }
 
   logout(): void {
-    this._autenticado.set(false);
+    this._accessToken.set(null);
     this._magistradoHash.set(null);
+    if (isPlatformBrowser(this.platformId)) {
+      sessionStorage.removeItem(STORAGE_KEY);
+    }
+  }
+
+  // ── Persistência local (apenas para sobreviver a reload de página) ──
+
+  private persistirSessao(sessao: SessaoPersistida): void {
+    if (!isPlatformBrowser(this.platformId)) return;
+    sessionStorage.setItem(STORAGE_KEY, JSON.stringify(sessao));
+  }
+
+  private restaurarSessao(): void {
+    if (!isPlatformBrowser(this.platformId)) return;
+    const raw = sessionStorage.getItem(STORAGE_KEY);
+    if (!raw) return;
+    try {
+      const sessao: SessaoPersistida = JSON.parse(raw);
+      this._accessToken.set(sessao.accessToken);
+      this._magistradoHash.set(sessao.magistradoHash);
+    } catch {
+      sessionStorage.removeItem(STORAGE_KEY);
+    }
   }
 }

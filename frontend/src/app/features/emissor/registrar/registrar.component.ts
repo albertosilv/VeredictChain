@@ -2,25 +2,27 @@ import { Component, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { HashService } from '../../../core/services/hash.service';
 import { DecisaoService } from '../../../core/services/decisao.service';
-import { AuthService } from '../../../core/services/auth.service';
-import type { DecisaoInput } from '../../../core/models/decisao.model';
+import type { RegistrarInput } from '../../../core/models/decisao.model';
+import { extrairMensagemErro } from '../../../core/utils/erro.util';
 
 interface FormState {
   arquivo: File | null;
-  documentHash: string;
+  hashPreview: string; // apenas para exibição — o hash real é calculado no servidor
   numeroProcesso: string;
   tribunalOrigem: string;
   orgaoJulgador: string;
   canalTransmissao: string;
+  canalTransmissaoDetalhe: string;
 }
 
 const FORM_VAZIO: FormState = {
   arquivo: null,
-  documentHash: '',
+  hashPreview: '',
   numeroProcesso: '',
   tribunalOrigem: '',
   orgaoJulgador: '',
   canalTransmissao: 'DJe',
+  canalTransmissaoDetalhe: '',
 };
 
 const CANAIS = ['DJe', 'SEEU', 'Malote Digital', 'PJe', 'e-SAJ', 'Outro'];
@@ -35,7 +37,6 @@ const CANAIS = ['DJe', 'SEEU', 'Malote Digital', 'PJe', 'e-SAJ', 'Outro'];
 export class RegistrarComponent {
   private readonly hashService = inject(HashService);
   private readonly decisaoService = inject(DecisaoService);
-  private readonly auth = inject(AuthService);
 
   readonly form = signal<FormState>({ ...FORM_VAZIO });
 
@@ -44,24 +45,20 @@ export class RegistrarComponent {
   readonly resultado = signal<{ txHash: string; documentHash: string } | null>(null);
   readonly erro = signal<string | null>(null);
 
-  // ── Hash do magistrado logado ──────────────────────────────────
-
-  readonly magistradoHash = this.auth.magistradoHash;
-
-  // ── Upload & Hash ──────────────────────────────────────────────
+  // ── Upload & Hash (preview local — o hash oficial é recalculado no servidor) ──
 
   async onFileSelected(event: Event): Promise<void> {
     const input = event.target as HTMLInputElement;
     const file = input.files?.[0];
     if (!file) return;
 
-    this.form.update(f => ({ ...f, arquivo: file }));
+    this.form.update(f => ({ ...f, arquivo: file, hashPreview: '' }));
     this.calculando.set(true);
     this.erro.set(null);
 
     try {
       const hash = await this.hashService.hashFile(file);
-      this.form.update(f => ({ ...f, documentHash: hash }));
+      this.form.update(f => ({ ...f, hashPreview: hash }));
     } catch {
       this.erro.set('Erro ao calcular hash do arquivo.');
     } finally {
@@ -73,18 +70,17 @@ export class RegistrarComponent {
 
   onSubmit(): void {
     const f = this.form();
-    const magistradoHash = this.auth.magistradoHash();
 
-    if (!f.arquivo || !f.documentHash) {
-      this.erro.set('Selecione um arquivo para gerar o hash.');
+    if (!f.arquivo) {
+      this.erro.set('Selecione um arquivo para registrar.');
       return;
     }
     if (!f.numeroProcesso || !f.tribunalOrigem || !f.orgaoJulgador) {
       this.erro.set('Preencha todos os campos obrigatórios.');
       return;
     }
-    if (!magistradoHash) {
-      this.erro.set('Magistrado não identificado. Faça login novamente.');
+    if (this.calculando()) {
+      this.erro.set('Aguarde o cálculo do hash do arquivo terminar.');
       return;
     }
 
@@ -92,13 +88,14 @@ export class RegistrarComponent {
     this.erro.set(null);
     this.resultado.set(null);
 
-    const input: DecisaoInput = {
-      documentHash: f.documentHash,
+    const input: RegistrarInput = {
+      arquivo: f.arquivo,
       numeroProcesso: f.numeroProcesso,
       tribunalOrigem: f.tribunalOrigem,
       orgaoJulgador: f.orgaoJulgador,
-      magistradoHash,
       canalTransmissao: f.canalTransmissao,
+      canalTransmissaoDetalhe: f.canalTransmissaoDetalhe || undefined,
+      hashCliente: f.hashPreview || undefined,
     };
 
     this.decisaoService.registrar(input).subscribe({
@@ -107,7 +104,7 @@ export class RegistrarComponent {
         this.enviando.set(false);
       },
       error: err => {
-        this.erro.set(err?.message ?? 'Erro ao registrar decisão.');
+        this.erro.set(extrairMensagemErro(err, 'Erro ao registrar decisão.'));
         this.enviando.set(false);
       },
     });

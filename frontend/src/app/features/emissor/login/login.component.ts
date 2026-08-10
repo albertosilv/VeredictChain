@@ -17,13 +17,18 @@ export class LoginComponent {
   readonly usuario = signal('');
   readonly senha = signal('');
   readonly erro = signal(false);
+  readonly enviando = signal(false);
 
   onSubmit(): void {
-    const ok = this.auth.login(this.usuario(), this.senha());
-    if (ok) {
-      this.router.navigate(['/emissor']);
-    } else {
-      this.erro.set(true);
-    }
+    this.erro.set(false);
+    this.enviando.set(true);
+    this.auth.login(this.usuario(), this.senha()).subscribe((ok) => {
+      this.enviando.set(false);
+      if (ok) {
+        this.router.navigate(['/emissor']);
+      } else {
+        this.erro.set(true);
+      }
+    });
   }
 }

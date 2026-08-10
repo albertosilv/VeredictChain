@@ -35,6 +35,22 @@
     </div>
   </section>
 
+  <!-- ═══ ALERTA DE AUDITORIA ═══ -->
+  @if (comMagistradoRevogado > 0) {
+    <section class="alerta-auditoria">
+      <span class="alerta-auditoria__icone">⚠️</span>
+      <div>
+        <strong class="alerta-auditoria__titulo">Atenção: credenciamento revogado após o registro</strong>
+        <p class="alerta-auditoria__texto">
+          {{ comMagistradoRevogado }} decisão(ões) sua(s) foram registradas quando você ainda estava
+          credenciado, mas seu credenciamento não está mais ativo hoje no contrato. Isso não invalida
+          as decisões já registradas, mas pode indicar necessidade de investigação — verifique com o
+          administrador do sistema.
+        </p>
+      </div>
+    </section>
+  }
+
   <!-- ═══ LISTA DE DECISÕES ═══ -->
   @if (carregando()) {
     <p class="text-center text-text-muted py-12">Carregando decisões...</p>

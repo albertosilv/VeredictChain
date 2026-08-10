@@ -39,9 +39,10 @@
         @if (calculando()) {
           <p class="mt-2 text-body-sm text-text-muted italic">Calculando hash SHA-256...</p>
         }
-        @if (form().novoHash) {
+        @if (form().hashPreview) {
           <p class="mt-2 text-body-sm text-success">
-            Hash gerado: <code class="bg-success-bg px-1.5 py-0.5 rounded-sm font-mono text-body-sm break-all">{{ form().novoHash }}</code>
+            Prévia local: <code class="bg-success-bg px-1.5 py-0.5 rounded-sm font-mono text-body-sm break-all">{{ form().hashPreview }}</code>
+            <br /><small class="text-caption text-text-muted">O hash oficial é recalculado pelo servidor no envio.</small>
           </p>
         }
       </div>
@@ -87,6 +88,19 @@
             }
           </select>
         </label>
+        @if (form().canalTransmissao === 'Outro') {
+          <label class="flex flex-col gap-1.5 text-label text-text-secondary">
+            Detalhe do canal
+            <input
+              type="text"
+              class="px-3 py-2.5 border border-border rounded-default text-body focus:outline-none focus:border-primary focus:shadow-[0_0_0_3px_rgba(37,99,235,0.15)] transition-colors"
+              [ngModel]="form().canalTransmissaoDetalhe"
+              (ngModelChange)="atualizarCampo('canalTransmissaoDetalhe', $event)"
+              maxlength="30"
+              placeholder="Ex: ofício circular manual"
+            />
+          </label>
+        }
       </div>
 
       <!-- Submit -->

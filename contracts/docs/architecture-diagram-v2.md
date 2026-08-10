@@ -19,19 +19,19 @@ subgraph FRONTEND["🖥️ Frontend — Angular 22"]
   direction TB
 
   subgraph PUBLIC["🌐 Área Pública"]
-    DROP["Dropzone<br/>Upload + SHA-256"]:::browser
-    VERIF["Verificação<br/>(em breve)"]:::browser
+    DROP["Dropzone<br/>Upload + SHA-256 (prévia) + consulta via backend"]:::browser
+    VERIF["Verificação Pública<br/>✅ implementado (parte do Dropzone)"]:::browser
   end
 
   subgraph EMISSOR["🔐 Painel Emissor — /emissor"]
-    LOGIN["Login Mock<br/>magistrado / tjpB2026"]:::frontend
-    REG["Formulário de Registro<br/>• Upload do documento<br/>• Hash automático (Web Crypto)<br/>• Metadados do processo"]:::frontend
-    CONSULTA["Consulta de Processo<br/>(em breve)"]:::frontend
+    LOGIN["Login (JWT real)<br/>POST /api/auth/login<br/>usuário/senha mock -> credencial ICP-Brasil real é trabalho futuro"]:::frontend
+    REG["Formulário de Registro<br/>• Upload do documento (enviado por inteiro)<br/>• Hash calculado no BACKEND, não no cliente<br/>• Metadados do processo"]:::frontend
+    CONSULTA["Consulta de Processo<br/>✅ implementado (consultar + minhas-decisoes)"]:::frontend
   end
 
-  LOGIN -->|"autentica"| REG
-  DROP -->|"calcula SHA-256"| DROP
-  REG -->|"calcula SHA-256"| REG
+  LOGIN -->|"JWT Bearer token"| REG
+  DROP -->|"calcula SHA-256 (prévia local)"| DROP
+  REG -->|"calcula SHA-256 (prévia local)"| REG
 end
 
 
@@ -39,11 +39,13 @@ end
 %% 2. BACKEND — NestJS
 %% ═══════════════════════════════════════════════════════
 subgraph BACKEND["⚙️ Backend — NestJS (Integrador Autorizado)"]
-  API["API REST :3000<br/>POST /api/decisoes<br/>POST /api/decisoes/retificar"]:::backend
-  VAL["ValidationPipe<br/>class-validator<br/>DTOs tipados"]:::backend
+  AUTH["AuthModule<br/>POST /api/auth/login<br/>JWT + bcrypt"]:::backend
+  API["API REST :3000<br/>POST /api/decisoes (multipart, JWT)<br/>POST /api/decisoes/retificar (multipart, JWT)<br/>GET /api/decisoes/minhas (JWT)"]:::backend
+  VAL["ValidationPipe + JwtAuthGuard<br/>class-validator DTOs<br/>DocumentoTextoService (magic bytes + conteúdo)"]:::backend
   WALLET["Carteira do Integrador<br/>ethers.Wallet<br/>INTEGRADOR_PRIVATE_KEY"]:::backend
   CONTRACT["ethers.Contract<br/>VeredictChain"]:::backend
 
+  AUTH -->|"emite JWT"| API
   API --> VAL
   VAL --> WALLET
   WALLET -->|"signTransaction"| CONTRACT
@@ -66,17 +68,18 @@ end
 %% ═══════════════════════════════════════════════════════
 
 %% ── Registro de Decisão ──
-REG -->|"POST /api/decisoes<br/>{ documentHash, metadados }"| API
-CONTRACT -->|"registrarDecisao(hash, ...)"| SC
+REG -->|"POST /api/decisoes (multipart)<br/>arquivo + metadados + JWT Bearer"| API
+CONTRACT -->|"registrarDecisao(hashCalculadoNoServidor, ...)"| SC
 SC -->|"txHash"| CONTRACT
 API -->|"201 { txHash, documentHash }"| REG
 
 %% ── Verificação Pública ──
-DROP -.->|"(em breve)<br/>verificarDecisao(hash)"| SC
-SC -.->|"Status + Metadados"| VERIF
+DROP -->|"GET /api/decisoes/:hash<br/>(hash calculado localmente, só para consulta)"| API
+API -->|"verificarDecisao(hash)"| SC
+SC -->|"Status + Metadados"| VERIF
 
 %% ── Retificação ──
-REG -->|"POST /api/decisoes/retificar<br/>{ novoHash, hashAnterior, ... }"| API
+REG -->|"POST /api/decisoes/retificar (multipart)<br/>arquivo + hashAnterior + metadados + JWT"| API
 CONTRACT -->|"registrarRetificacao(...)"| SC
 ```
 
@@ -88,14 +91,20 @@ CONTRACT -->|"registrarRetificacao(...)"| SC
 Magistrado       Frontend                Backend              Blockchain
    │                │                       │                     │
    │  login         │                       │                     │
-   ├───────────────►│                       │                     │
-   │                │  upload documento     │                     │
-   │                │  SHA-256 (Web Crypto) │                     │
+   ├───────────────►│  POST /api/auth/login │                     │
+   │                ├──────────────────────►│                     │
+   │                │◄──────────────────────┤  JWT accessToken    │
    │  preenche      │                       │                     │
-   │  metadados     │                       │                     │
+   │  metadados +   │                       │                     │
+   │  seleciona doc │                       │                     │
    ├───────────────►│                       │                     │
    │                │  POST /api/decisoes   │                     │
+   │                │  (multipart + JWT)    │                     │
    │                ├──────────────────────►│                     │
+   │                │                       │  valida magic bytes │
+   │                │                       │  recalcula SHA-256  │
+   │                │                       │  confere numProcesso│
+   │                │                       │  no conteudo do doc │
    │                │                       │  registrarDecisao() │
    │                │                       ├────────────────────►│
    │                │                       │       txHash        │
@@ -108,16 +117,16 @@ Magistrado       Frontend                Backend              Blockchain
 
 ### Fluxo de Retificação (✅ funcional)
 
-Mesmo fluxo do registro, mas exige `hashAnterior` e chama `registrarRetificacao()` no contrato. A decisão anterior recebe status **Retificada**.
+Mesmo fluxo do registro, mas exige `hashAnterior` e chama `registrarRetificacao()` no contrato. A decisão anterior recebe status **Retificada**. O contrato agora também bloqueia uma segunda "original" (`registrarDecisao`) para o mesmo processo enquanto houver decisão ativa — força esse caminho de retificação.
 
-### Fluxo de Verificação (⏳ em breve)
+### Fluxo de Verificação Pública (✅ funcional)
 
-Qualquer pessoa faz upload de um documento → frontend calcula SHA-256 → consulta direto no contrato (`verificarDecisao`) → retorna se o hash existe e seus metadados.
+Qualquer pessoa faz upload de um documento no Dropzone → frontend calcula uma prévia de SHA-256 localmente → consulta `GET /api/decisoes/:hash` no backend → backend chama `verificarDecisao` no contrato → retorna se o hash existe e seus metadados públicos.
 
 ## 🧩 Camadas e responsabilidades
 
 | Camada | Tecnologia | Responsabilidade |
 |--------|-----------|-----------------|
-| **Frontend** | Angular 22, Web Crypto API | Hash SHA-256 no navegador, UI de upload/registro, nunca vê a chave privada |
-| **Backend** | NestJS, ethers v6 | Assina transações com a carteira do integrador, valida DTOs, expõe API REST |
-| **Contrato** | Solidity ^0.8.20, Hardhat | Registro imutável, ciclo de vida das decisões, verificação pública |
+| **Frontend** | Angular 22, Web Crypto API | Login (JWT), UI de upload/registro/consulta, hash SHA-256 local só como prévia de UX, nunca vê a chave privada do integrador |
+| **Backend** | NestJS, ethers v6 | Autentica (JWT+bcrypt), valida magic bytes e conteúdo do arquivo, **calcula o hash oficial**, assina transações com a carteira do integrador, expõe API REST |
+| **Contrato** | Solidity ^0.8.20, Hardhat | Registro imutável, ciclo de vida das decisões, controle de acesso (admin/integrador), limites de tamanho, verificação pública |

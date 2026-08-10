@@ -5,22 +5,10 @@ import { RouterLink } from '@angular/router';
 import { DecisaoService } from '../../../core/services/decisao.service';
 import type { Decisao } from '../../../core/models/decisao.model';
 import { StatusDecisao } from '../../../core/models/decisao.model';
+import { statusLabel as obterStatusLabel, statusClass as obterStatusClass } from '../../../core/utils/status-decisao';
+import { extrairMensagemErro } from '../../../core/utils/erro.util';
 
 const ZERO_HASH = '0x0000000000000000000000000000000000000000000000000000000000000000';
-
-const STATUS_LABELS: Record<number, string> = {
-  [StatusDecisao.Inexistente]: 'Inexistente',
-  [StatusDecisao.Publicada]: 'Publicada',
-  [StatusDecisao.Retificada]: 'Retificada',
-  [StatusDecisao.Arquivada]: 'Arquivada',
-};
-
-const STATUS_CLASSES: Record<number, string> = {
-  [StatusDecisao.Inexistente]: 'status-inexistente',
-  [StatusDecisao.Publicada]: 'status-publicada',
-  [StatusDecisao.Retificada]: 'status-retificada',
-  [StatusDecisao.Arquivada]: 'status-arquivada',
-};
 
 @Component({
   selector: 'app-consultar',
@@ -55,7 +43,7 @@ export class ConsultarComponent {
         this.buscou.set(true);
       },
       error: (err) => {
-        this.erro.set(err?.message ?? 'Erro ao consultar processo.');
+        this.erro.set(extrairMensagemErro(err, 'Erro ao consultar processo.'));
         this.buscando.set(false);
         this.buscou.set(true);
       },
@@ -74,7 +62,7 @@ export class ConsultarComponent {
         this.onBuscar();
       },
       error: (err) => {
-        this.erro.set(err?.message ?? 'Erro ao arquivar decisão.');
+        this.erro.set(extrairMensagemErro(err, 'Erro ao arquivar decisão.'));
         this.arquivando.set(null);
       },
     });
@@ -87,11 +75,11 @@ export class ConsultarComponent {
   // ── Helpers para o template ──────────────────────────────────
 
   statusLabel(status: number): string {
-    return STATUS_LABELS[status] ?? 'Desconhecido';
+    return obterStatusLabel(status);
   }
 
   statusClass(status: number): string {
-    return STATUS_CLASSES[status] ?? '';
+    return obterStatusClass(status);
   }
 
   isOriginal(hashAnterior: string): boolean {

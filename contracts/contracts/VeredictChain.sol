@@ -67,6 +67,35 @@ contract VeredictChain {
         _;
     }
 
+    /// @dev Limites de tamanho para campos de texto livre — mitiga grief de gas/storage
+    ///      caso a chave do integrador seja comprometida e o contrato seja chamado
+    ///      diretamente, sem passar pelas validações do backend (DTO).
+    function _validarTamanhos(
+        string calldata numeroProcesso,
+        string calldata tribunalOrigem,
+        string calldata orgaoJulgador,
+        string calldata canalTransmissao
+    ) private pure {
+        require(bytes(numeroProcesso).length > 0 && bytes(numeroProcesso).length <= 30, "VeredictChain: numeroProcesso invalido");
+        require(bytes(tribunalOrigem).length > 0 && bytes(tribunalOrigem).length <= 20, "VeredictChain: tribunalOrigem invalido");
+        require(bytes(orgaoJulgador).length > 0 && bytes(orgaoJulgador).length <= 60, "VeredictChain: orgaoJulgador invalido");
+        require(bytes(canalTransmissao).length > 0 && bytes(canalTransmissao).length <= 40, "VeredictChain: canalTransmissao invalido");
+    }
+
+    /// @dev Um processo tem "decisao ativa" quando já possui pelo menos um registro
+    ///      cuja última versão não está Arquivada. Enquanto isso for verdade, um novo
+    ///      "original" (registrarDecisao) não pode ser criado para o mesmo número —
+    ///      qualquer nova versão precisa vir por registrarRetificacao, que exige
+    ///      referenciar explicitamente o hash anterior. Isso impede tanto (a) registrar
+    ///      um documento alterado como se fosse uma "primeira publicação" independente,
+    ///      quanto (b) que um segundo agente "sequestre" um número de processo já em uso.
+    function _possuiDecisaoAtiva(string calldata numeroProcesso) private view returns (bool) {
+        bytes32[] storage historico = historicoPorProcesso[numeroProcesso];
+        if (historico.length == 0) return false;
+        bytes32 ultimoHash = historico[historico.length - 1];
+        return decisoes[ultimoHash].status != Status.Arquivada;
+    }
+
     constructor() {
         admin = msg.sender;
         integradoresAutorizados[msg.sender] = true;
@@ -118,6 +147,11 @@ contract VeredictChain {
         require(documentHash != bytes32(0), "VeredictChain: hash invalido");
         require(decisoes[documentHash].status == Status.Inexistente, "VeredictChain: hash ja registrado");
         require(magistradosCredenciados[magistradoHash], "VeredictChain: magistrado nao credenciado");
+        _validarTamanhos(numeroProcesso, tribunalOrigem, orgaoJulgador, canalTransmissao);
+        require(
+            !_possuiDecisaoAtiva(numeroProcesso),
+            "VeredictChain: processo ja possui decisao ativa, use retificacao"
+        );
 
         decisoes[documentHash] = Decisao({
             documentHash: documentHash,
@@ -153,6 +187,7 @@ contract VeredictChain {
         require(decisoes[hashAnterior].status != Status.Inexistente, "VeredictChain: hash anterior nao existe");
         require(decisoes[hashAnterior].status != Status.Arquivada, "VeredictChain: decisao anterior arquivada");
         require(magistradosCredenciados[magistradoHash], "VeredictChain: magistrado nao credenciado");
+        _validarTamanhos(numeroProcesso, tribunalOrigem, orgaoJulgador, canalTransmissao);
 
         decisoes[hashAnterior].status = Status.Retificada;
 
@@ -175,7 +210,10 @@ contract VeredictChain {
     }
 
     /// @notice Arquiva uma decisão (ex: trânsito em julgado, fim do ciclo de vida processual).
-    function arquivarDecisao(bytes32 documentHash) external onlyAdmin {
+    /// @notice Arquiva uma decisão (ex.: trânsito em julgado). Operação do fluxo
+    ///         operacional normal — mesmo ator (integrador/backend) que registra e
+    ///         retifica decisões, não uma ação de governança administrativa.
+    function arquivarDecisao(bytes32 documentHash) external onlyIntegrador {
         require(decisoes[documentHash].status != Status.Inexistente, "VeredictChain: hash nao existe");
         decisoes[documentHash].status = Status.Arquivada;
         emit DecisaoArquivada(documentHash, block.timestamp);

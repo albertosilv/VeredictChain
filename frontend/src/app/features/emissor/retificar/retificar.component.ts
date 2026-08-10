@@ -3,34 +3,22 @@ import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { DecisaoService } from '../../../core/services/decisao.service';
 import { HashService } from '../../../core/services/hash.service';
-import { AuthService } from '../../../core/services/auth.service';
-import type { Decisao, DecisaoInput } from '../../../core/models/decisao.model';
+import type { Decisao, RetificarInput } from '../../../core/models/decisao.model';
 import { StatusDecisao } from '../../../core/models/decisao.model';
+import { statusLabel as obterStatusLabel, statusClass as obterStatusClass } from '../../../core/utils/status-decisao';
+import { extrairMensagemErro } from '../../../core/utils/erro.util';
 
 interface RetificarFormState {
   novoArquivo: File | null;
-  novoHash: string;
+  hashPreview: string; // apenas para exibição — o hash real é calculado no servidor
   numeroProcesso: string;
   tribunalOrigem: string;
   orgaoJulgador: string;
   canalTransmissao: string;
+  canalTransmissaoDetalhe: string;
 }
 
 const CANAIS = ['DJe', 'SEEU', 'Malote Digital', 'PJe', 'e-SAJ', 'Outro'];
-
-const STATUS_LABELS: Record<number, string> = {
-  [StatusDecisao.Inexistente]: 'Inexistente',
-  [StatusDecisao.Publicada]: 'Publicada',
-  [StatusDecisao.Retificada]: 'Retificada',
-  [StatusDecisao.Arquivada]: 'Arquivada',
-};
-
-const STATUS_CLASSES: Record<number, string> = {
-  [StatusDecisao.Inexistente]: 'status-inexistente',
-  [StatusDecisao.Publicada]: 'status-publicada',
-  [StatusDecisao.Retificada]: 'status-retificada',
-  [StatusDecisao.Arquivada]: 'status-arquivada',
-};
 
 @Component({
   selector: 'app-retificar',
@@ -44,7 +32,6 @@ export class RetificarComponent implements OnInit {
   private readonly router = inject(Router);
   private readonly decisaoService = inject(DecisaoService);
   private readonly hashService = inject(HashService);
-  private readonly auth = inject(AuthService);
 
   // ── Decisão original ─────────────────────────────────────────
 
@@ -66,11 +53,12 @@ export class RetificarComponent implements OnInit {
 
   readonly form = signal<RetificarFormState>({
     novoArquivo: null,
-    novoHash: '',
+    hashPreview: '',
     numeroProcesso: '',
     tribunalOrigem: '',
     orgaoJulgador: '',
     canalTransmissao: 'DJe',
+    canalTransmissaoDetalhe: '',
   });
 
   readonly calculando = signal(false);
@@ -82,11 +70,9 @@ export class RetificarComponent implements OnInit {
     const f = this.form();
     return (
       f.novoArquivo !== null &&
-      f.novoHash !== '' &&
       f.numeroProcesso !== '' &&
       f.tribunalOrigem !== '' &&
-      f.orgaoJulgador !== '' &&
-      this.auth.magistradoHash() !== null
+      f.orgaoJulgador !== ''
     );
   });
 
@@ -114,26 +100,26 @@ export class RetificarComponent implements OnInit {
         this.carregandoOriginal.set(false);
       },
       error: (err) => {
-        this.erroOriginal.set(err?.message ?? 'Erro ao buscar decisão original.');
+        this.erroOriginal.set(extrairMensagemErro(err, 'Erro ao buscar decisão original.'));
         this.carregandoOriginal.set(false);
       },
     });
   }
 
-  // ── Upload & Hash ─────────────────────────────────────────────
+  // ── Upload & Hash (preview local — o hash oficial é recalculado no servidor) ──
 
   async onFileSelected(event: Event): Promise<void> {
     const input = event.target as HTMLInputElement;
     const file = input.files?.[0];
     if (!file) return;
 
-    this.form.update((f) => ({ ...f, novoArquivo: file, novoHash: '' }));
+    this.form.update((f) => ({ ...f, novoArquivo: file, hashPreview: '' }));
     this.calculando.set(true);
     this.erro.set(null);
 
     try {
       const hash = await this.hashService.hashFile(file);
-      this.form.update((f) => ({ ...f, novoHash: hash }));
+      this.form.update((f) => ({ ...f, hashPreview: hash }));
     } catch {
       this.erro.set('Erro ao calcular hash do novo documento.');
     } finally {
@@ -144,7 +130,12 @@ export class RetificarComponent implements OnInit {
   // ── Helpers de formulário ─────────────────────────────────────
 
   atualizarCampo(
-    campo: 'numeroProcesso' | 'tribunalOrigem' | 'orgaoJulgador' | 'canalTransmissao',
+    campo:
+      | 'numeroProcesso'
+      | 'tribunalOrigem'
+      | 'orgaoJulgador'
+      | 'canalTransmissao'
+      | 'canalTransmissaoDetalhe',
     valor: string,
   ): void {
     this.form.update((f) => ({ ...f, [campo]: valor }));
@@ -154,11 +145,14 @@ export class RetificarComponent implements OnInit {
 
   onSubmit(): void {
     const hashAnterior = this.hashAnterior();
-    const magistradoHash = this.auth.magistradoHash();
     const f = this.form();
 
-    if (!hashAnterior || !magistradoHash) {
+    if (!hashAnterior || !f.novoArquivo) {
       this.erro.set('Dados insuficientes para retificação.');
+      return;
+    }
+    if (this.calculando()) {
+      this.erro.set('Aguarde o cálculo do hash do arquivo terminar.');
       return;
     }
 
@@ -166,13 +160,14 @@ export class RetificarComponent implements OnInit {
     this.erro.set(null);
     this.resultado.set(null);
 
-    const input: DecisaoInput = {
-      documentHash: f.novoHash,
+    const input: RetificarInput = {
+      arquivo: f.novoArquivo,
       numeroProcesso: f.numeroProcesso,
       tribunalOrigem: f.tribunalOrigem,
       orgaoJulgador: f.orgaoJulgador,
-      magistradoHash,
       canalTransmissao: f.canalTransmissao,
+      canalTransmissaoDetalhe: f.canalTransmissaoDetalhe || undefined,
+      hashCliente: f.hashPreview || undefined,
       hashAnterior,
     };
 
@@ -182,7 +177,7 @@ export class RetificarComponent implements OnInit {
         this.enviando.set(false);
       },
       error: (err) => {
-        this.erro.set(err?.message ?? 'Erro ao registrar retificação.');
+        this.erro.set(extrairMensagemErro(err, 'Erro ao registrar retificação.'));
         this.enviando.set(false);
       },
     });
@@ -192,11 +187,12 @@ export class RetificarComponent implements OnInit {
     const o = this.original();
     this.form.set({
       novoArquivo: null,
-      novoHash: '',
+      hashPreview: '',
       numeroProcesso: o?.numeroProcesso ?? '',
       tribunalOrigem: o?.tribunalOrigem ?? '',
       orgaoJulgador: o?.orgaoJulgador ?? '',
       canalTransmissao: o?.canalTransmissao ?? 'DJe',
+      canalTransmissaoDetalhe: '',
     });
     this.resultado.set(null);
     this.erro.set(null);
@@ -207,10 +203,10 @@ export class RetificarComponent implements OnInit {
   readonly canais = CANAIS;
 
   statusLabel(status: number): string {
-    return STATUS_LABELS[status] ?? 'Desconhecido';
+    return obterStatusLabel(status);
   }
 
   statusClass(status: number): string {
-    return STATUS_CLASSES[status] ?? '';
+    return obterStatusClass(status);
   }
 }

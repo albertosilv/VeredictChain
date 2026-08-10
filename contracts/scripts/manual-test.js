@@ -154,11 +154,108 @@ async function main() {
     assert.strictEqual(decisao.status.toString(), "3"); // Arquivada
   });
 
+  await test("REGRESSAO (bug B1): arquivamento deve funcionar quando admin != integrador (topologia realista de producao)", async () => {
+    const { contrato, integrador } = await deployNovo();
+    // admin = deployer (governanca/CNJ-TJPB); integrador = carteira separada do backend.
+    // Este e exatamente o cenario que expos o bug original: arquivarDecisao() exigia
+    // onlyAdmin, mas quem assina a transacao no backend real e sempre o integrador.
+    await contrato.credenciarMagistrado(magistradoHash);
+    await contrato.autorizarIntegrador(integrador.address);
+    await contrato
+      .connect(integrador)
+      .registrarDecisao(hashDecisao1, "0001234-56.2026.8.15.0001", "TJPB", "1a Vara", magistradoHash, "SEEU");
+
+    // O backend real assina SEMPRE com a carteira do integrador, nunca a do admin.
+    await contrato.connect(integrador).arquivarDecisao(hashDecisao1);
+    const [, decisao] = await contrato.verificarDecisao(hashDecisao1);
+    assert.strictEqual(decisao.status.toString(), "3"); // Arquivada
+  });
+
+  await test("rejeita arquivamento por conta nao autorizada (nem admin, nem integrador)", async () => {
+    const { contrato, integrador, outro } = await deployNovo();
+    await contrato.credenciarMagistrado(magistradoHash);
+    await contrato.autorizarIntegrador(integrador.address);
+    await contrato
+      .connect(integrador)
+      .registrarDecisao(hashDecisao1, "0001234-56.2026.8.15.0001", "TJPB", "1a Vara", magistradoHash, "SEEU");
+
+    await expectRevert(
+      contrato.connect(outro).arquivarDecisao(hashDecisao1),
+      "integrador nao autorizado"
+    );
+  });
+
   await test("simula o cenario do Oficio-Circular 001/2026: acordao falso nunca registrado", async () => {
     const { contrato } = await deployNovo();
     const hashAcordaoFalso = keccak("acordao-stj-falso-inserido-no-seeu");
     const [existe] = await contrato.verificarDecisao(hashAcordaoFalso);
     assert.strictEqual(existe, false);
+  });
+
+  await test("rejeita nova 'original' para processo que ja tem decisao ativa (evita duplicidade/sequestro de processo)", async () => {
+    const { contrato, integrador } = await deployNovo();
+    await contrato.credenciarMagistrado(magistradoHash);
+    await contrato.autorizarIntegrador(integrador.address);
+    await contrato
+      .connect(integrador)
+      .registrarDecisao(hashDecisao1, "0001234-56.2026.8.15.0001", "TJPB", "1a Vara", magistradoHash, "SEEU");
+
+    const hashAdulterado = keccak("versao-adulterada-do-mesmo-processo");
+    await expectRevert(
+      contrato
+        .connect(integrador)
+        .registrarDecisao(hashAdulterado, "0001234-56.2026.8.15.0001", "TJPB", "1a Vara", magistradoHash, "SEEU"),
+      "processo ja possui decisao ativa"
+    );
+  });
+
+  await test("permite nova 'original' apos arquivamento (processo reaberto/novo ciclo)", async () => {
+    const { contrato, integrador } = await deployNovo();
+    await contrato.credenciarMagistrado(magistradoHash);
+    await contrato.autorizarIntegrador(integrador.address);
+    await contrato
+      .connect(integrador)
+      .registrarDecisao(hashDecisao1, "0001234-56.2026.8.15.0001", "TJPB", "1a Vara", magistradoHash, "SEEU");
+    await contrato.connect(integrador).arquivarDecisao(hashDecisao1);
+
+    const hashNovoCiclo = keccak("novo-ciclo-apos-arquivamento");
+    await contrato
+      .connect(integrador)
+      .registrarDecisao(hashNovoCiclo, "0001234-56.2026.8.15.0001", "TJPB", "1a Vara", magistradoHash, "SEEU");
+    const [existe] = await contrato.verificarDecisao(hashNovoCiclo);
+    assert.strictEqual(existe, true);
+  });
+
+  await test("rejeita numeroProcesso com tamanho acima do limite (protecao contra grief de gas/storage)", async () => {
+    const { contrato, integrador } = await deployNovo();
+    await contrato.credenciarMagistrado(magistradoHash);
+    await contrato.autorizarIntegrador(integrador.address);
+
+    await expectRevert(
+      contrato
+        .connect(integrador)
+        .registrarDecisao(hashDecisao1, "X".repeat(200), "TJPB", "1a Vara", magistradoHash, "SEEU"),
+      "numeroProcesso invalido"
+    );
+  });
+
+  await test("aceita canalTransmissao com detalhe ('Outro: ...') dentro do novo limite de 40 bytes", async () => {
+    const { contrato, integrador } = await deployNovo();
+    await contrato.credenciarMagistrado(magistradoHash);
+    await contrato.autorizarIntegrador(integrador.address);
+
+    await contrato
+      .connect(integrador)
+      .registrarDecisao(
+        hashDecisao1,
+        "0001234-56.2026.8.15.0001",
+        "TJPB",
+        "1a Vara",
+        magistradoHash,
+        "Outro: oficio-circular-manual"
+      );
+    const [existe] = await contrato.verificarDecisao(hashDecisao1);
+    assert.strictEqual(existe, true);
   });
 
   console.log(`\n${passed} passando, ${failed} falhando`);
