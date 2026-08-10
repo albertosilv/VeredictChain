@@ -1,4 +1,4 @@
-/* Consultar — estilos residuais (timeline + status badges) */
+/* Consultar — estilos residuais (timeline + status dots) */
 
 /* Timeline */
 .timeline {
@@ -12,11 +12,12 @@
   position: relative;
 }
 
+/* Linha vertical conectando os marcadores */
 .timeline-item:not(.ultima)::before {
   content: '';
   position: absolute;
-  left: 1rem;
-  top: 2.2rem;
+  left: 2.25rem;            /* centro do dot (marcador tem 4.5rem) */
+  top: 2.25rem;             /* abaixo do label do status */
   bottom: 0;
   width: 2px;
   background: var(--color-border);
@@ -24,35 +25,53 @@
 
 .timeline-marker {
   flex-shrink: 0;
-  width: 2rem;
+  width: 4.5rem;
   display: flex;
-  justify-content: center;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25rem;
   padding-top: 0.25rem;
 }
 
-/* Status badges (dinâmicos via [class]) */
-.status-badge {
-  display: inline-block;
-  font-size: 0.7rem;
-  font-weight: 700;
-  padding: 0.2rem 0.5rem;
-  border-radius: var(--radius-full);
-  text-transform: uppercase;
-  letter-spacing: 0.03em;
-  white-space: nowrap;
+/* Círculo colorido indicando o status */
+.status-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
 }
 
-.status-publicada {
-  background: var(--color-success-bg);
+.status-dot.status-publicada {
+  background: var(--color-success);
+}
+
+.status-dot.status-retificada {
+  background: var(--color-warning);
+}
+
+.status-dot.status-arquivada {
+  background: var(--color-text-muted);
+}
+
+/* Label textual abaixo do círculo */
+.status-label {
+  font-size: 0.625rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: var(--color-text-muted);
+  text-align: center;
+  line-height: 1.2;
+}
+
+.status-label.status-publicada {
   color: var(--color-success);
 }
 
-.status-retificada {
-  background: var(--color-warning-bg);
+.status-label.status-retificada {
   color: var(--color-warning);
 }
 
-.status-arquivada {
-  background: var(--color-border);
+.status-label.status-arquivada {
   color: var(--color-text-muted);
 }

@@ -36,7 +36,7 @@
       <h3 class="text-heading-sm text-text mb-6">
         Processo: {{ decisoes()[0].numeroProcesso }}
         <span class="inline-block bg-primary-light text-[#3730a3] text-caption px-2.5 py-1 rounded-full ml-2 align-middle">
-          {{ decisoes().length }} versão{{ decisoes().length > 1 ? 'ões' : '' }}
+          {{ decisoes().length > 1 ? decisoes().length + ' versões' : '1 versão' }}
         </span>
       </h3>
 
@@ -44,7 +44,8 @@
         @for (decisao of decisoes(); track decisao.documentHash; let i = $index) {
           <div class="timeline-item" [class.ultima]="i === decisoes().length - 1">
             <div class="timeline-marker">
-              <span class="status-badge" [class]="statusClass(decisao.status)">
+              <span class="status-dot" [class]="statusClass(decisao.status)"></span>
+              <span class="status-label" [class]="statusClass(decisao.status)">
                 {{ statusLabel(decisao.status) }}
               </span>
             </div>
