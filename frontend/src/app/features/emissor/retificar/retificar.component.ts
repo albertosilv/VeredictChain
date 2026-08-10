@@ -90,12 +90,18 @@ export class RetificarComponent implements OnInit {
     this.decisaoService.buscarPorHash(hash).subscribe({
       next: (decisao) => {
         this.original.set(decisao);
+
+        // O canal salvo na blockchain pode ser composto (ex: "Outro: ofício").
+        // Separa a parte base para o select e o detalhe para o campo extra.
+        const { canal, detalhe } = this.parseCanalTransmissao(decisao.canalTransmissao);
+
         this.form.update((f) => ({
           ...f,
           numeroProcesso: decisao.numeroProcesso,
           tribunalOrigem: decisao.tribunalOrigem,
           orgaoJulgador: decisao.orgaoJulgador,
-          canalTransmissao: decisao.canalTransmissao,
+          canalTransmissao: canal,
+          canalTransmissaoDetalhe: detalhe,
         }));
         this.carregandoOriginal.set(false);
       },
@@ -185,14 +191,17 @@ export class RetificarComponent implements OnInit {
 
   reset(): void {
     const o = this.original();
+    const { canal, detalhe } = o
+      ? this.parseCanalTransmissao(o.canalTransmissao)
+      : { canal: 'DJe', detalhe: '' };
     this.form.set({
       novoArquivo: null,
       hashPreview: '',
       numeroProcesso: o?.numeroProcesso ?? '',
       tribunalOrigem: o?.tribunalOrigem ?? '',
       orgaoJulgador: o?.orgaoJulgador ?? '',
-      canalTransmissao: o?.canalTransmissao ?? 'DJe',
-      canalTransmissaoDetalhe: '',
+      canalTransmissao: canal,
+      canalTransmissaoDetalhe: detalhe,
     });
     this.resultado.set(null);
     this.erro.set(null);
@@ -201,6 +210,18 @@ export class RetificarComponent implements OnInit {
   // ── Exposição para o template ──────────────────────────────────
 
   readonly canais = CANAIS;
+
+  /**
+   * Separa um canal composto (ex: "Outro: ofício circular") na parte base
+   * ("Outro") e no detalhe ("ofício circular"). Para canais simples
+   * ("DJe", "SEEU"), retorna o próprio canal com detalhe vazio.
+   */
+  private parseCanalTransmissao(canal: string): { canal: string; detalhe: string } {
+    if (canal.startsWith('Outro: ')) {
+      return { canal: 'Outro', detalhe: canal.slice(7) };
+    }
+    return { canal, detalhe: '' };
+  }
 
   statusLabel(status: number): string {
     return obterStatusLabel(status);

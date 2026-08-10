@@ -53,6 +53,7 @@
           Número do Processo
           <input
             type="text"
+            name="numeroProcesso"
             class="px-3 py-2.5 border border-border rounded-default text-body focus:outline-none focus:border-primary focus:shadow-[0_0_0_3px_rgba(37,99,235,0.15)] transition-colors"
             [ngModel]="form().numeroProcesso"
             (ngModelChange)="atualizarCampo('numeroProcesso', $event)"
@@ -62,6 +63,7 @@
           Tribunal de Origem
           <input
             type="text"
+            name="tribunalOrigem"
             class="px-3 py-2.5 border border-border rounded-default text-body focus:outline-none focus:border-primary focus:shadow-[0_0_0_3px_rgba(37,99,235,0.15)] transition-colors"
             [ngModel]="form().tribunalOrigem"
             (ngModelChange)="atualizarCampo('tribunalOrigem', $event)"
@@ -71,6 +73,7 @@
           Órgão Julgador
           <input
             type="text"
+            name="orgaoJulgador"
             class="px-3 py-2.5 border border-border rounded-default text-body focus:outline-none focus:border-primary focus:shadow-[0_0_0_3px_rgba(37,99,235,0.15)] transition-colors"
             [ngModel]="form().orgaoJulgador"
             (ngModelChange)="atualizarCampo('orgaoJulgador', $event)"
@@ -79,6 +82,7 @@
         <label class="flex flex-col gap-1.5 text-label text-text-secondary">
           Canal de Transmissão
           <select
+            name="canalTransmissao"
             class="px-3 py-2.5 border border-border rounded-default text-body focus:outline-none focus:border-primary focus:shadow-[0_0_0_3px_rgba(37,99,235,0.15)] transition-colors"
             [ngModel]="form().canalTransmissao"
             (ngModelChange)="atualizarCampo('canalTransmissao', $event)"
@@ -93,6 +97,7 @@
             Detalhe do canal
             <input
               type="text"
+              name="canalTransmissaoDetalhe"
               class="px-3 py-2.5 border border-border rounded-default text-body focus:outline-none focus:border-primary focus:shadow-[0_0_0_3px_rgba(37,99,235,0.15)] transition-colors"
               [ngModel]="form().canalTransmissaoDetalhe"
               (ngModelChange)="atualizarCampo('canalTransmissaoDetalhe', $event)"
