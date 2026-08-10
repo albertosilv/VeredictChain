@@ -17,7 +17,7 @@
   content: '';
   position: absolute;
   left: 2.25rem;            /* centro do dot (marcador tem 4.5rem) */
-  top: 1.35rem;             /* abaixo do dot + gap */
+  top: 2.25rem;             /* abaixo do label do status */
   bottom: 0;
   width: 2px;
   background: var(--color-border);
