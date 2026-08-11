@@ -1,0 +1,56 @@
+/* ═══════════════════════════════════════════════
+   Minhas Decisões — estilos residuais
+   (status badges aplicados dinamicamente via [class])
+   ═══════════════════════════════════════════════ */
+
+.status-badge {
+  display: inline-block;
+  font-size: var(--text-caption);
+  font-weight: 600;
+  padding: 0.25rem 0.625rem;
+  border-radius: var(--radius-sm);
+}
+
+.status-publicada {
+  background: var(--color-success-bg);
+  color: var(--color-success);
+}
+
+.status-retificada {
+  background: var(--color-warning-bg);
+  color: var(--color-warning);
+}
+
+.status-arquivada {
+  background: var(--color-border);
+  color: var(--color-text-muted);
+}
+
+.alerta-auditoria {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  background: var(--color-warning-bg);
+  border: 1px solid var(--color-warning-border);
+  color: var(--color-text);
+  padding: 1rem;
+  border-radius: var(--radius-default);
+  margin-bottom: 1.5rem;
+}
+
+.alerta-auditoria__icone {
+  font-size: 1.25rem;
+  line-height: 1;
+}
+
+.alerta-auditoria__titulo {
+  display: block;
+  font-size: var(--text-body-sm);
+  color: var(--color-warning);
+}
+
+.alerta-auditoria__texto {
+  font-size: var(--text-body-sm);
+  margin: 0.25rem 0 0;
+  color: var(--color-text-secondary);
+}

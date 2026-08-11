@@ -1,0 +1,22 @@
+{
+  "name": "veredictchain",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "npx hardhat test",
+    "compile": "npx hardhat compile",
+    "node": "npx hardhat node",
+    "deploy:hardhat": "npx hardhat run scripts/deploy.js --network localhost",
+    "deploy:besu": "npx hardhat run scripts/deploy.js --network besu",
+    "deploy:sepolia": "npx hardhat run scripts/deploy.js --network sepolia"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@nomicfoundation/hardhat-toolbox": "^5.0.0",
+    "hardhat": "^2.29.0",
+    "solc": "^0.8.28"
+  }
+}

@@ -1,0 +1,144 @@
+<div class="max-w-[700px] mx-auto py-8 px-4">
+  <h2 class="text-heading text-text mb-6">Retificar Decisão</h2>
+
+  <!-- Loading da decisão original -->
+  @if (carregandoOriginal()) {
+    <p class="text-center text-text-muted py-8">Carregando dados da decisão original...</p>
+  }
+
+  <!-- Erro ao carregar -->
+  @if (erroOriginal()) {
+    <div class="bg-danger-bg text-danger border border-danger-border rounded-default p-4 mb-6">{{ erroOriginal() }}</div>
+  }
+
+  <!-- Formulário de retificação -->
+  @if (!carregandoOriginal() && !erroOriginal() && original()) {
+    <div class="bg-surface-alt border border-border rounded-default p-4 mb-6">
+      <h3 class="text-heading-sm mb-2 flex items-center gap-2">
+        Retificando: v{{ indiceVersao() }}
+        <span class="status-badge" [class]="statusClass(original()!.status)">
+          {{ statusLabel(original()!.status) }}
+        </span>
+      </h3>
+      <p class="text-body-sm text-text-secondary">
+        Hash anterior: <code class="bg-surface-alt px-1.5 py-0.5 rounded-sm font-mono text-body-sm break-all">{{ original()!.documentHash }}</code>
+      </p>
+    </div>
+
+    <form class="retificar-form" (submit)="onSubmit(); $event.preventDefault()">
+      <!-- Upload novo documento -->
+      <div class="mb-6">
+        <label class="flex items-center gap-2 p-6 border-2 border-dashed border-border rounded-default cursor-pointer font-medium transition-colors hover:border-primary hover:bg-primary-bg">
+          <span class="text-2xl">📄</span>
+          <span>Novo documento (PDF)</span>
+          <input type="file" accept=".pdf" (change)="onFileSelected($event)" class="hidden" />
+        </label>
+        @if (form().novoArquivo) {
+          <p class="mt-2 text-body-sm text-text-secondary">Selecionado: {{ form().novoArquivo?.name }}</p>
+        }
+        @if (calculando()) {
+          <p class="mt-2 text-body-sm text-text-muted italic">Calculando hash SHA-256...</p>
+        }
+        @if (form().hashPreview) {
+          <p class="mt-2 text-body-sm text-success">
+            Prévia local: <code class="bg-success-bg px-1.5 py-0.5 rounded-sm font-mono text-body-sm break-all">{{ form().hashPreview }}</code>
+            <br /><small class="text-caption text-text-muted">O hash oficial é recalculado pelo servidor no envio.</small>
+          </p>
+        }
+      </div>
+
+      <!-- Campos editáveis (herdados da original) -->
+      <div class="grid grid-cols-2 gap-4 mb-6">
+        <label class="flex flex-col gap-1.5 text-label text-text-secondary">
+          Número do Processo
+          <input
+            type="text"
+            name="numeroProcesso"
+            class="px-3 py-2.5 border border-border rounded-default text-body focus:outline-none focus:border-primary focus:shadow-[0_0_0_3px_rgba(37,99,235,0.15)] transition-colors"
+            [ngModel]="form().numeroProcesso"
+            (ngModelChange)="atualizarCampo('numeroProcesso', $event)"
+          />
+        </label>
+        <label class="flex flex-col gap-1.5 text-label text-text-secondary">
+          Tribunal de Origem
+          <input
+            type="text"
+            name="tribunalOrigem"
+            class="px-3 py-2.5 border border-border rounded-default text-body focus:outline-none focus:border-primary focus:shadow-[0_0_0_3px_rgba(37,99,235,0.15)] transition-colors"
+            [ngModel]="form().tribunalOrigem"
+            (ngModelChange)="atualizarCampo('tribunalOrigem', $event)"
+          />
+        </label>
+        <label class="flex flex-col gap-1.5 text-label text-text-secondary">
+          Órgão Julgador
+          <input
+            type="text"
+            name="orgaoJulgador"
+            class="px-3 py-2.5 border border-border rounded-default text-body focus:outline-none focus:border-primary focus:shadow-[0_0_0_3px_rgba(37,99,235,0.15)] transition-colors"
+            [ngModel]="form().orgaoJulgador"
+            (ngModelChange)="atualizarCampo('orgaoJulgador', $event)"
+          />
+        </label>
+        <label class="flex flex-col gap-1.5 text-label text-text-secondary">
+          Canal de Transmissão
+          <select
+            name="canalTransmissao"
+            class="px-3 py-2.5 border border-border rounded-default text-body focus:outline-none focus:border-primary focus:shadow-[0_0_0_3px_rgba(37,99,235,0.15)] transition-colors"
+            [ngModel]="form().canalTransmissao"
+            (ngModelChange)="atualizarCampo('canalTransmissao', $event)"
+          >
+            @for (canal of canais; track canal) {
+              <option [value]="canal">{{ canal }}</option>
+            }
+          </select>
+        </label>
+        @if (form().canalTransmissao === 'Outro') {
+          <label class="flex flex-col gap-1.5 text-label text-text-secondary">
+            Detalhe do canal
+            <input
+              type="text"
+              name="canalTransmissaoDetalhe"
+              class="px-3 py-2.5 border border-border rounded-default text-body focus:outline-none focus:border-primary focus:shadow-[0_0_0_3px_rgba(37,99,235,0.15)] transition-colors"
+              [ngModel]="form().canalTransmissaoDetalhe"
+              (ngModelChange)="atualizarCampo('canalTransmissaoDetalhe', $event)"
+              maxlength="30"
+              placeholder="Ex: ofício circular manual"
+            />
+          </label>
+        }
+      </div>
+
+      <!-- Submit -->
+      @if (erro()) {
+        <div class="bg-danger-bg text-danger border border-danger-border rounded-default p-4 mb-6">{{ erro() }}</div>
+      }
+
+      @if (resultado()) {
+        <div class="bg-success-bg text-success border border-success-border rounded-default p-4 mb-6">
+          ✅ Retificação registrada!<br />
+          Tx: <code class="bg-success-bg/60 px-1.5 py-0.5 rounded-sm font-mono text-body-sm break-all">{{ resultado()!.txHash }}</code><br />
+          Novo hash: <code class="bg-success-bg/60 px-1.5 py-0.5 rounded-sm font-mono text-body-sm break-all">{{ resultado()!.documentHash }}</code>
+        </div>
+      }
+
+      <div class="flex gap-3 items-center">
+        <button
+          type="submit"
+          class="px-6 py-3 bg-warning text-text-inverse border-none rounded-default font-semibold cursor-pointer transition-colors hover:bg-[#d97706] disabled:opacity-50 disabled:cursor-not-allowed"
+          [disabled]="!podeEnviar() || enviando()"
+        >
+          {{ enviando() ? 'Enviando...' : 'Registrar Retificação' }}
+        </button>
+        <button
+          type="button"
+          class="px-5 py-3 bg-surface-alt text-text-secondary border border-border rounded-default font-medium cursor-pointer transition-colors hover:bg-border disabled:opacity-50"
+          (click)="reset()"
+          [disabled]="enviando()"
+        >
+          Limpar
+        </button>
+        <a [routerLink]="['/emissor/consultar']" class="px-5 py-3 text-text-muted no-underline font-medium transition-colors hover:text-text-secondary">Voltar</a>
+      </div>
+    </form>
+  }
+</div>

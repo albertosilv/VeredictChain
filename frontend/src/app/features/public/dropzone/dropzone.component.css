@@ -1,0 +1,78 @@
+/* ═══════════════════════════════════════════════
+   Dropzone Público — estilos residuais
+   (estados dinâmicos + status badges + responsivo)
+   ═══════════════════════════════════════════════ */
+
+/* Dropzone states */
+.dropzone.drag-over label {
+  border-color: var(--color-primary);
+  background: var(--color-primary-bg);
+  border-style: solid;
+}
+
+.dropzone.has-file label {
+  border-color: #16a34a;
+  border-style: solid;
+  background: var(--color-success-bg);
+}
+
+/* Result boxes */
+.resultado {
+  display: flex;
+  gap: 0.75rem;
+  padding: 1.25rem;
+  border-radius: var(--radius-default);
+  margin-bottom: 1.5rem;
+  font-size: 0.9rem;
+  line-height: 1.6;
+}
+
+.resultado.autentico {
+  background: var(--color-success-bg);
+  border: 1px solid var(--color-success-border);
+  color: #166534;
+}
+
+.resultado.nao-encontrado {
+  background: var(--color-danger-bg);
+  border: 1px solid var(--color-danger-border);
+  color: #991b1b;
+}
+
+.resultado.erro {
+  background: var(--color-warning-bg);
+  border: 1px solid var(--color-warning-border);
+  color: var(--color-warning);
+}
+
+/* Status badges */
+.status-badge {
+  display: inline-block;
+  padding: 0.2rem 0.6rem;
+  border-radius: var(--radius-sm);
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.status-publicada {
+  background: var(--color-primary-light);
+  color: #1e40af;
+}
+
+.status-retificada {
+  background: var(--color-warning-bg);
+  color: var(--color-warning);
+}
+
+.status-arquivada {
+  background: var(--color-border);
+  color: var(--color-text-secondary);
+}
+
+/* Responsive */
+@media (max-width: 600px) {
+  .max-w-\[720px\] {
+    margin-top: 1rem;
+    margin-bottom: 1rem;
+  }
+}

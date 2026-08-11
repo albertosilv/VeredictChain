@@ -1,0 +1,113 @@
+<div class="max-w-[860px] mx-auto py-4">
+  <h2 class="text-heading text-text mb-6">Minhas Decisões</h2>
+
+  <!-- ═══ IDENTIDADE DO MAGISTRADO ═══ -->
+  <section class="flex items-center gap-3 bg-surface-dark text-text-inverse p-4 rounded-default mb-6">
+    <div>
+      <strong class="block text-caption text-slate-300 mb-0.5">Magistrado autenticado</strong>
+      <code class="text-caption break-all text-blue-300 bg-black/30 px-1.5 py-0.5 rounded-sm">{{ magistradoHash() }}</code>
+    </div>
+  </section>
+
+  <!-- ═══ DASHBOARD STATS ═══ -->
+  <section class="grid grid-cols-[repeat(auto-fit,minmax(140px,1fr))] gap-4 mb-6">
+    <div class="bg-surface border border-border rounded-default p-5 text-center shadow-card">
+      <span class="block text-[2rem] font-bold text-text">{{ totalDecisoes }}</span>
+      <span class="block text-caption text-text-muted mt-1">Total de decisões</span>
+    </div>
+
+    @for (entry of porStatus | keyvalue; track entry.key) {
+      <div class="bg-surface border border-border rounded-default p-5 text-center shadow-card">
+        <span
+          class="block text-[2rem] font-bold"
+          [class.text-success]="entry.key === 'Publicada'"
+          [class.text-warning]="entry.key === 'Retificada'"
+          [class.text-text-muted]="entry.key === 'Arquivada'"
+        >{{ entry.value }}</span>
+        <span class="block text-caption text-text-muted mt-1">{{ entry.key }}</span>
+      </div>
+    }
+
+    <div class="bg-surface border border-border rounded-default p-5 text-center shadow-card">
+      <span class="block text-body-sm font-semibold text-text">{{ ultimaAtualizacao }}</span>
+      <span class="block text-caption text-text-muted mt-1">Última atualização</span>
+    </div>
+  </section>
+
+  <!-- ═══ ALERTA DE AUDITORIA ═══ -->
+  @if (comMagistradoRevogado > 0) {
+    <section class="alerta-auditoria">
+      <div>
+        <strong class="alerta-auditoria__titulo">Atenção: credenciamento revogado após o registro</strong>
+        <p class="alerta-auditoria__texto">
+          {{ comMagistradoRevogado }} decisão(ões) sua(s) foram registradas quando você ainda estava
+          credenciado, mas seu credenciamento não está mais ativo hoje no contrato. Isso não invalida
+          as decisões já registradas, mas pode indicar necessidade de investigação — verifique com o
+          administrador do sistema.
+        </p>
+      </div>
+    </section>
+  }
+
+  <!-- ═══ LISTA DE DECISÕES ═══ -->
+  @if (carregando()) {
+    <p class="text-center text-text-muted py-12">Carregando decisões...</p>
+  } @else if (erro()) {
+    <div class="bg-danger-bg text-danger border border-danger-border rounded-default p-4 mb-6">{{ erro() }}</div>
+  } @else if (decisoes().length === 0) {
+    <div class="text-center text-text-muted py-12">
+      <p class="mb-4">Nenhuma decisão sua encontrada na blockchain.</p>
+      <a
+        routerLink="/emissor/registrar"
+        class="inline-block mt-4 px-6 py-2.5 bg-primary text-text-inverse rounded-default font-semibold text-body-sm no-underline hover:bg-primary-hover transition-colors"
+      >Registrar nova decisão</a>
+    </div>
+  } @else {
+    <section>
+      <h3 class="text-heading-sm text-text mb-4">Suas decisões registradas</h3>
+
+      @for (decisao of decisoes(); track decisao.documentHash) {
+        <div class="bg-surface border border-border rounded-default mb-4 overflow-hidden shadow-card hover:shadow-card-hover transition-shadow">
+          <!-- Status + Assinatura -->
+          <div class="flex items-center justify-between px-4 py-3 bg-surface-alt border-b border-border">
+            <span class="status-badge" [class]="statusClass(decisao.status)">
+              {{ statusLabel(decisao.status) }}
+            </span>
+
+            
+          </div>
+
+          <!-- Metadados -->
+          <div class="p-4">
+            <div class="mb-1.5 text-body">
+              <span class="font-semibold text-text-secondary mr-2">Processo:</span>
+              <span>{{ decisao.numeroProcesso }}</span>
+            </div>
+            <div class="grid grid-cols-2 gap-x-6 gap-y-1.5 mt-2 mb-2">
+              <div class="text-body">
+                <span class="font-semibold text-text-secondary mr-2">Tribunal:</span>
+                <span>{{ decisao.tribunalOrigem }}</span>
+              </div>
+              <div class="text-body">
+                <span class="font-semibold text-text-secondary mr-2">Órgão Julgador:</span>
+                <span>{{ decisao.orgaoJulgador }}</span>
+              </div>
+              <div class="text-body">
+                <span class="font-semibold text-text-secondary mr-2">Canal:</span>
+                <span>{{ decisao.canalTransmissao }}</span>
+              </div>
+              <div class="text-body">
+                <span class="font-semibold text-text-secondary mr-2">Data:</span>
+                <span>{{ decisao.timestamp * 1000 | date:'dd/MM/yyyy HH:mm' }}</span>
+              </div>
+            </div>
+            <div class="text-body mt-2">
+              <span class="font-semibold text-text-secondary mr-2">Hash do documento:</span>
+              <code class="block mt-1 font-mono text-body-sm bg-surface-alt px-1.5 py-0.5 rounded-sm break-all">{{ decisao.documentHash }}</code>
+            </div>
+          </div>
+        </div>
+      }
+    </section>
+  }
+</div>

@@ -1,0 +1,77 @@
+/* Consultar — estilos residuais (timeline + status dots) */
+
+/* Timeline */
+.timeline {
+  position: relative;
+}
+
+.timeline-item {
+  display: flex;
+  gap: 1rem;
+  padding-bottom: 1.5rem;
+  position: relative;
+}
+
+/* Linha vertical conectando os marcadores */
+.timeline-item:not(.ultima)::before {
+  content: '';
+  position: absolute;
+  left: 2.25rem;            /* centro do dot (marcador tem 4.5rem) */
+  top: 2.25rem;             /* abaixo do label do status */
+  bottom: 0;
+  width: 2px;
+  background: var(--color-border);
+}
+
+.timeline-marker {
+  flex-shrink: 0;
+  width: 4.5rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25rem;
+  padding-top: 0.25rem;
+}
+
+/* Círculo colorido indicando o status */
+.status-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.status-dot.status-publicada {
+  background: var(--color-success);
+}
+
+.status-dot.status-retificada {
+  background: var(--color-warning);
+}
+
+.status-dot.status-arquivada {
+  background: var(--color-text-muted);
+}
+
+/* Label textual abaixo do círculo */
+.status-label {
+  font-size: 0.625rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: var(--color-text-muted);
+  text-align: center;
+  line-height: 1.2;
+}
+
+.status-label.status-publicada {
+  color: var(--color-success);
+}
+
+.status-label.status-retificada {
+  color: var(--color-warning);
+}
+
+.status-label.status-arquivada {
+  color: var(--color-text-muted);
+}

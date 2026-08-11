@@ -1,0 +1,157 @@
+<div class="max-w-[680px] mx-auto">
+  <h2 class="text-heading text-text mb-6">Registrar Decisão</h2>
+
+  <!-- ═══ ARQUIVO ═══ -->
+  <section class="bg-surface border border-border rounded-default p-6 mb-6">
+    <h3 class="text-heading-sm text-text-secondary mb-4">Documento</h3>
+    <div class="dropzone" [class.has-file]="!!form().arquivo">
+      <input
+        type="file"
+        id="arquivo"
+        (change)="onFileSelected($event)"
+        accept=".pdf,.doc,.docx,.odt,.txt"
+        class="absolute opacity-0 w-0 h-0"
+      />
+      <label
+        for="arquivo"
+        class="flex flex-col items-center gap-1.5 py-8 px-4 border-2 border-dashed border-border rounded-sm cursor-pointer text-center transition-colors hover:border-primary"
+      >
+        @if (!form().arquivo) {
+          <span class="text-[2rem]">📄</span>
+          <span>Clique para selecionar o documento</span>
+          <small class="text-caption text-text-muted">PDF, DOCX, ODT, TXT</small>
+        } @else {
+          <span class="text-[2rem]">✅</span>
+          <span>{{ form().arquivo!.name }}</span>
+          <small class="text-caption text-text-muted">{{ (form().arquivo!.size / 1024).toFixed(1) }} KB</small>
+        }
+      </label>
+    </div>
+
+    @if (calculando()) {
+      <p class="mt-3 text-body-sm text-text-secondary">⏳ Calculando hash SHA-256...</p>
+    }
+
+    @if (form().hashPreview) {
+      <div class="mt-3 bg-surface-alt rounded-sm px-3 py-2.5 flex items-center gap-2">
+        <span class="text-caption font-semibold text-text-secondary whitespace-nowrap">SHA-256 (prévia local):</span>
+        <code class="text-body-sm text-text break-all">{{ form().hashPreview }}</code>
+      </div>
+      <p class="mt-1 text-caption text-text-muted">
+        Esta é apenas uma prévia calculada no seu navegador. O hash oficial é recalculado
+        pelo servidor a partir do arquivo enviado no momento do registro.
+      </p>
+    }
+  </section>
+
+  <!-- ═══ METADADOS ═══ -->
+  <section class="bg-surface border border-border rounded-default p-6 mb-6">
+    <h3 class="text-heading-sm text-text-secondary mb-4">Metadados do Processo</h3>
+
+    <div class="grid grid-cols-2 gap-4">
+      <label class="flex flex-col gap-1 text-label text-text-secondary">
+        Nº Processo *
+        <input
+          type="text"
+          [ngModel]="form().numeroProcesso"
+          (ngModelChange)="form.update(f => ({ ...f, numeroProcesso: $event }))"
+          placeholder="0001234-56.2026.8.15.0001"
+          name="numeroProcesso"
+          class="px-3 py-2 border border-border rounded-sm text-body focus:outline-none focus:border-primary focus:shadow-[0_0_0_2px_rgba(37,99,235,0.15)] transition-colors"
+        />
+      </label>
+
+      <label class="flex flex-col gap-1 text-label text-text-secondary">
+        Tribunal de Origem *
+        <input
+          type="text"
+          [ngModel]="form().tribunalOrigem"
+          (ngModelChange)="form.update(f => ({ ...f, tribunalOrigem: $event }))"
+          placeholder="TJPB"
+          name="tribunalOrigem"
+          class="px-3 py-2 border border-border rounded-sm text-body focus:outline-none focus:border-primary focus:shadow-[0_0_0_2px_rgba(37,99,235,0.15)] transition-colors"
+        />
+      </label>
+
+      <label class="flex flex-col gap-1 text-label text-text-secondary">
+        Órgão Julgador *
+        <input
+          type="text"
+          [ngModel]="form().orgaoJulgador"
+          (ngModelChange)="form.update(f => ({ ...f, orgaoJulgador: $event }))"
+          placeholder="1ª Vara Cível"
+          name="orgaoJulgador"
+          class="px-3 py-2 border border-border rounded-sm text-body focus:outline-none focus:border-primary focus:shadow-[0_0_0_2px_rgba(37,99,235,0.15)] transition-colors"
+        />
+      </label>
+
+      <label class="flex flex-col gap-1 text-label text-text-secondary">
+        Canal de Transmissão
+        <select
+          [ngModel]="form().canalTransmissao"
+          (ngModelChange)="form.update(f => ({ ...f, canalTransmissao: $event }))"
+          name="canalTransmissao"
+          class="px-3 py-2 border border-border rounded-sm text-body bg-surface focus:outline-none focus:border-primary focus:shadow-[0_0_0_2px_rgba(37,99,235,0.15)] transition-colors cursor-pointer"
+        >
+          @for (c of canais; track c) {
+            <option [value]="c">{{ c }}</option>
+          }
+        </select>
+      </label>
+
+      @if (form().canalTransmissao === 'Outro') {
+        <label class="flex flex-col gap-1 text-label text-text-secondary">
+          Detalhe do canal
+          <input
+            type="text"
+            [ngModel]="form().canalTransmissaoDetalhe"
+            (ngModelChange)="form.update(f => ({ ...f, canalTransmissaoDetalhe: $event }))"
+            name="canalTransmissaoDetalhe"
+            maxlength="30"
+            placeholder="Ex: ofício circular manual"
+            class="px-3 py-2 border border-border rounded-sm text-body focus:outline-none focus:border-primary focus:shadow-[0_0_0_2px_rgba(37,99,235,0.15)] transition-colors"
+          />
+        </label>
+      }
+
+      <div class="col-span-2 flex flex-col gap-1 bg-surface-alt border border-border rounded-sm px-3 py-2.5">
+        <span class="text-label text-text-secondary">Magistrado</span>
+        <small class="text-caption text-text-muted">
+          Identificado automaticamente pela sua sessão autenticada — não é enviado pelo
+          formulário, o servidor associa o registro ao seu login.
+        </small>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ FEEDBACK ═══ -->
+  @if (erro()) {
+    <div class="p-4 rounded-sm mb-4 text-body bg-danger-bg text-danger border border-danger-border">{{ erro() }}</div>
+  }
+
+  @if (resultado()) {
+    <div class="p-4 rounded-sm mb-4 text-body bg-success-bg text-success border border-success-border">
+      <strong>Decisão registrada!</strong>
+      <p class="mt-1 mb-0">Tx: <code class="text-body-sm break-all">{{ resultado()!.txHash }}</code></p>
+      <p class="mt-1 mb-0">Hash: <code class="text-body-sm break-all">{{ resultado()!.documentHash }}</code></p>
+    </div>
+  }
+
+  <!-- ═══ AÇÕES ═══ -->
+  <div class="flex gap-3">
+    <button
+      class="px-6 py-2.5 bg-primary text-text-inverse border-none rounded-sm text-body font-medium cursor-pointer hover:bg-primary-hover disabled:opacity-60 disabled:cursor-not-allowed transition-colors"
+      (click)="onSubmit()"
+      [disabled]="enviando() || calculando()"
+    >
+      {{ enviando() ? 'Registrando...' : 'Registrar Decisão' }}
+    </button>
+    <button
+      class="px-6 py-2.5 bg-surface text-text-secondary border border-border rounded-sm text-body cursor-pointer hover:bg-surface-hover disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+      (click)="reset()"
+      [disabled]="enviando()"
+    >
+      Limpar
+    </button>
+  </div>
+</div>

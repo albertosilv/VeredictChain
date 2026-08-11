@@ -1,0 +1,5 @@
+/* Emissor Shell — apenas estado ativo do link */
+a.active {
+  background: var(--color-primary);
+  color: white;
+}

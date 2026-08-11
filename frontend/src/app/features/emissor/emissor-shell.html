@@ -1,0 +1,35 @@
+<div class="flex min-h-screen">
+  <nav class="w-[240px] bg-surface-dark text-text-inverse p-6 flex flex-col gap-4">
+    <h3 class="text-heading-sm text-center pb-2 border-b border-slate-700 m-0">Painel Emissor</h3>
+    <ul class="list-none p-0 m-0 flex flex-col gap-1">
+      <li>
+        <a
+          routerLink="/emissor/registrar"
+          routerLinkActive="active"
+          class="text-slate-300 no-underline py-2 px-3 rounded-sm block text-body-sm hover:bg-slate-700 transition-colors"
+        >Registrar Decisão</a>
+      </li>
+      <li>
+        <a
+          routerLink="/emissor/consultar"
+          routerLinkActive="active"
+          class="text-slate-300 no-underline py-2 px-3 rounded-sm block text-body-sm hover:bg-slate-700 transition-colors"
+        >Consultar Processo</a>
+      </li>
+      <li>
+        <a
+          routerLink="/emissor/minhas-decisoes"
+          routerLinkActive="active"
+          class="text-slate-300 no-underline py-2 px-3 rounded-sm block text-body-sm hover:bg-slate-700 transition-colors"
+        >Minhas Decisões</a>
+      </li>
+    </ul>
+    <button
+      class="mt-auto py-2 bg-transparent text-text-muted border border-slate-600 rounded-sm cursor-pointer hover:bg-slate-700 hover:text-text-inverse transition-colors"
+      (click)="auth.logout()"
+    >Sair</button>
+  </nav>
+  <main class="flex-1 p-8 bg-surface-alt">
+    <router-outlet />
+  </main>
+</div>

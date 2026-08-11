@@ -1,0 +1,6 @@
+/* Registrar — estado de arquivo selecionado (aplicado dinamicamente) */
+.dropzone.has-file label {
+  border-color: #16a34a;
+  border-style: solid;
+  background: var(--color-success-bg);
+}
